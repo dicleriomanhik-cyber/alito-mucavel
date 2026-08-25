@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Painel Admin — MC Alito Mucavel</title>
+<meta name="robots" content="noindex, nofollow">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#0A0E1A', elev: '#121933', elev2: '#1A2340',
+          gold: '#C9A24B', goldsoft: '#E4CD8C',
+          ink: '#F3EFE4', muted: '#8D95AC', line: '#26304F',
+        },
+        fontFamily: {
+          display: ['"Fraunces"', 'serif'],
+          body: ['"Manrope"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid #C9A24B; outline-offset: 2px;
+  }
+  .tab-active { background: #C9A24B; color: #0A0E1A; }
+  .upload-progress-bar { transition: width 0.2s ease; }
+</style>
+</head>
+
+<!--
+  CONFIGURAÇÃO DE UPLOAD DE FOTOS/VÍDEOS (Cloudinary — plano grátis)
+  Sem isto configurado, o upload direto do telemóvel não funciona — mas
+  colar um link continua a funcionar sempre, como alternativa.
+  Passos para ativar (5 minutos, sem cartão de crédito):
+    1. Criar conta grátis em https://cloudinary.com/users/register/free
+    2. No Dashboard, copiar o "Cloud name" e colar abaixo em CLOUD_NAME.
+    3. Ir a Settings → Upload → Upload presets → "Add upload preset".
+       Pôr "Signing Mode" como "Unsigned", guardar, e copiar o nome do
+       preset para UPLOAD_PRESET abaixo.
+-->
+<script>
+  window.CLOUDINARY_CLOUD_NAME = "xjrcx7yr";
+  window.CLOUDINARY_UPLOAD_PRESET = "mc_alito_uploads";
+  window.MAX_VIDEO_SECONDS = 60; // limite de duração dos vídeos da galeria
+</script>
+
+<body class="bg-bg text-ink font-body antialiased min-h-screen">
+
+  <!-- ============ ECRÃ DE LOGIN ============ -->
+  <section id="login-screen" class="min-h-screen flex items-center justify-center px-5">
+    <div class="w-full max-w-xs">
+      <p class="font-display italic text-2xl text-center mb-1">Painel Admin</p>
+      <p class="text-muted text-sm text-center mb-8">Alito Mucavel · Mestre de Cerimónias</p>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="token-input" class="block text-xs uppercase tracking-widest text-muted mb-2">Token de acesso</label>
+          <input id="token-input" type="password" required
+                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 focus:border-gold outline-none"
+                 placeholder="••••••••••••">
+        </div>
+        <button type="submit"
+                class="w-full bg-gold text-bg font-semibold px-6 py-3.5 rounded-lg hover:bg-goldsoft transition-colors">
+          Entrar
+        </button>
+        <p id="login-error" class="text-red-400 text-sm text-center hidden" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ PAINEL (visível após login) ============ -->
+  <div id="admin-panel" class="hidden max-w-2xl mx-auto px-4 pb-16">
+
+    <header class="flex items-center justify-between py-5 sticky top-0 bg-bg/90 backdrop-blur-sm z-10 border-b border-line">
+      <span class="font-display italic text-lg">Painel Admin</span>
+      <button id="logout-btn" class="text-xs uppercase tracking-widest text-muted hover:text-gold">Sair</button>
+    </header>
+
+    <!-- ---- Perfil público (o que o cliente vê ao clicar no nome/foto) ---- -->
+    <section class="mt-6">
+      <h2 class="font-display italic text-xl mb-1">O seu perfil</h2>
+      <p class="text-muted text-xs mb-4">Isto é o que o cliente vê ao clicar no seu nome no site.</p>
+
+      <form id="profile-form" class="space-y-3 bg-elev border border-line rounded-xl p-4">
+        <div>
+          <label for="profile-photo-url" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Foto de perfil</label>
+          <div class="flex items-center gap-3 mb-2">
+            <span id="profile-photo-preview" class="w-14 h-14 rounded-full bg-elev2 border border-line overflow-hidden shrink-0 flex items-center justify-center text-muted text-xs">—</span>
+            <label class="flex-1 text-center border border-gold/40 text-gold rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-gold hover:text-bg transition-colors">
+              Escolher da galeria do telemóvel
+              <input id="profile-photo-file" type="file" accept="image/*" class="hidden">
+            </label>
+          </div>
+          <p id="profile-photo-status" class="text-xs mb-2 hidden"></p>
+          <input id="profile-photo-url" type="url" placeholder="ou cole aqui o link de uma foto já publicada"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+          <p class="text-muted text-[11px] mt-1">Deixe em branco para mostrar as suas iniciais.</p>
+        </div>
+        <div>
+          <label for="profile-full-name" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Nome completo</label>
+          <input id="profile-full-name" type="text" required
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm focus:border-gold outline-none">
+        </div>
+        <div>
+          <label for="profile-location" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Localização</label>
+          <input id="profile-location" type="text" required placeholder="Ex: Maputo, Moçambique"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        </div>
+        <div>
+          <label for="profile-whatsapp" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Número de WhatsApp</label>
+          <input id="profile-whatsapp" type="tel" required placeholder="+258 87 605 0602"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+          <p class="text-muted text-[11px] mt-1">É para este número que os pedidos de orçamento são redirecionados.</p>
+        </div>
+        <div>
+          <label for="profile-bio" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Biografia / percurso</label>
+          <textarea id="profile-bio" rows="4" placeholder="Conte um pouco do seu percurso como MC…"
+                    class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none resize-none"></textarea>
+        </div>
+        <button type="submit"
+                class="w-full bg-gold text-bg font-semibold px-4 py-2.5 rounded-lg hover:bg-goldsoft transition-colors text-sm">
+          Guardar perfil
+        </button>
+        <p id="profile-feedback" class="text-sm text-center hidden"></p>
+      </form>
+    </section>
+
+    <!-- ---- Pedidos (Leads) ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Pedidos de orçamento</h2>
+      <p class="text-muted text-xs mb-4">
+        "Confirmados" corresponde ao estado <code class="text-goldsoft">closed</code> (negócio fechado).
+      </p>
+
+      <div id="status-tabs" class="flex gap-2 mb-5 overflow-x-auto">
+        <button data-filter="" class="tab-btn tab-active text-xs uppercase tracking-widest px-4 py-2 rounded-full border border-gold shrink-0">Todos</button>
+        <button data-filter="pending" class="tab-btn text-xs uppercase tracking-widest px-4 py-2 rounded-full border border-line shrink-0 hover:border-gold">Pendentes</button>
+        <button data-filter="contacted" class="tab-btn text-xs uppercase tracking-widest px-4 py-2 rounded-full border border-line shrink-0 hover:border-gold">Contactados</button>
+        <button data-filter="closed" class="tab-btn text-xs uppercase tracking-widest px-4 py-2 rounded-full border border-line shrink-0 hover:border-gold">Confirmados</button>
+      </div>
+
+      <div id="leads-list" class="space-y-3">
+        <div class="h-24 rounded-xl bg-elev animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- ---- Descrição de cada tipo de evento ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Descrição de cada tipo de evento</h2>
+      <p class="text-muted text-xs mb-4">
+        Um texto curto para animar o cliente, mostrado no site antes dos pacotes desse evento.
+      </p>
+      <div id="event-info-list" class="space-y-3">
+        <div class="h-16 rounded-lg bg-elev animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- ---- Pacotes por tipo de evento ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Pacotes e preços</h2>
+      <p class="text-muted text-xs mb-4">
+        Casamento pode ter vários pacotes; os outros eventos costumam ter só um.
+        O texto da descrição e das características aparece <strong>por completo</strong> no site do cliente.
+      </p>
+
+      <form id="package-form" class="grid grid-cols-2 gap-2 mb-5 bg-elev border border-line rounded-xl p-4">
+        <input id="package-name" type="text" placeholder="Nome do pacote" required
+               class="col-span-2 bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        <select id="package-event-type" required
+                class="col-span-2 bg-elev2 border border-line rounded-lg px-3 py-2 text-sm focus:border-gold outline-none">
+          <option value="">Tipo de evento…</option>
+          <option value="Aniversário">Aniversário</option>
+          <option value="Casamento">Casamento</option>
+          <option value="Corporativo">Corporativo</option>
+          <option value="Graduação">Graduação</option>
+          <option value="Xitique">Xitique</option>
+          <option value="Outro">Outro</option>
+        </select>
+        <textarea id="package-description" rows="2" placeholder="Descrição breve" required
+                  class="col-span-2 bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none resize-none"></textarea>
+        <input id="package-price" type="number" min="0" step="1" placeholder="Preço (MT)" required
+               class="bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        <textarea id="package-features" rows="4" placeholder="Um item por linha, ex:&#10;Receção de gala com entrada triunfal&#10;Condução dos discursos&#10;Ritual do bolo"
+                  class="col-span-2 bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none resize-y"></textarea>
+        <button type="submit" id="package-submit-btn"
+                class="col-span-2 bg-gold text-bg font-semibold px-4 py-2.5 rounded-lg hover:bg-goldsoft transition-colors text-sm">
+          Adicionar pacote
+        </button>
+        <button type="button" id="package-cancel-edit-btn"
+                class="col-span-2 hidden text-center text-muted text-xs hover:text-ink">
+          Cancelar edição
+        </button>
+        <p id="package-feedback" class="col-span-2 text-sm text-center hidden"></p>
+      </form>
+
+      <div id="packages-admin-list" class="space-y-4">
+        <div class="h-16 rounded-lg bg-elev animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- ---- Galeria (fotos/vídeos do portfólio) ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Galeria</h2>
+      <p class="text-muted text-xs mb-4">Fotos e vídeos mostrados no site. Escolha diretamente do telemóvel.</p>
+
+      <form id="media-form" class="grid grid-cols-2 gap-2 mb-5 bg-elev border border-line rounded-xl p-4">
+        <input id="media-title" type="text" placeholder="Título (ex: Casamento em Maputo)" required
+               class="col-span-2 bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        <select id="media-type" required
+                class="bg-elev2 border border-line rounded-lg px-3 py-2 text-sm focus:border-gold outline-none">
+          <option value="image">Foto</option>
+          <option value="video">Vídeo</option>
+        </select>
+
+        <label id="media-upload-label"
+               class="flex items-center justify-center text-center border border-gold/40 text-gold rounded-lg px-3 py-2 text-sm cursor-pointer hover:bg-gold hover:text-bg transition-colors">
+          Escolher do telemóvel
+          <input id="media-file" type="file" accept="image/*" class="hidden">
+        </label>
+
+        <p id="media-upload-status" class="col-span-2 text-xs hidden"></p>
+        <div id="media-upload-progress-wrap" class="col-span-2 h-1.5 bg-elev2 rounded-full overflow-hidden hidden">
+          <div id="media-upload-progress-bar" class="upload-progress-bar h-full bg-gold" style="width:0%"></div>
+        </div>
+
+        <details class="col-span-2">
+          <summary class="text-xs text-muted cursor-pointer">ou colar o link manualmente</summary>
+          <div class="mt-2 space-y-2">
+            <input id="media-url" type="url" placeholder="Link da foto/vídeo"
+                   class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+            <input id="media-thumbnail" type="url" placeholder="Link da miniatura (opcional, só para vídeos)"
+                   class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+          </div>
+        </details>
+
+        <button type="submit"
+                class="col-span-2 bg-gold text-bg font-semibold px-4 py-2.5 rounded-lg hover:bg-goldsoft transition-colors text-sm">
+          Adicionar à galeria
+        </button>
+        <p id="media-feedback" class="col-span-2 text-sm text-center hidden"></p>
+      </form>
+
+      <div id="media-admin-list" class="space-y-2">
+        <div class="h-16 rounded-lg bg-elev animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- ---- Agenda / Datas bloqueadas ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-4">Indisponibilidade de agenda</h2>
+
+      <form id="blocked-date-form" class="flex flex-col sm:flex-row gap-2 mb-5">
+        <input id="blocked-date-input" type="date" required
+               class="flex-1 bg-elev border border-line rounded-lg px-4 py-2.5 focus:border-gold outline-none">
+        <input id="blocked-reason-input" type="text" maxlength="200" placeholder="Motivo (opcional)"
+               class="flex-1 bg-elev border border-line rounded-lg px-4 py-2.5 placeholder:text-muted/60 focus:border-gold outline-none">
+        <button type="submit"
+                class="bg-gold text-bg font-semibold px-5 py-2.5 rounded-lg hover:bg-goldsoft transition-colors whitespace-nowrap">
+          Bloquear data
+        </button>
+      </form>
+
+      <div id="blocked-dates-list" class="space-y-2">
+        <div class="h-12 rounded-lg bg-elev animate-pulse"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
