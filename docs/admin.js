@@ -203,7 +203,7 @@
     // ver novos pedidos sem precisar de dar refresh manual à página.
     if (leadsAutoRefreshTimer) clearInterval(leadsAutoRefreshTimer);
     leadsAutoRefreshTimer = setInterval(() => {
-      if (!document.hidden) loadLeads();
+      if (!document.hidden) loadLeads(true);
     }, 3000);
   }
 
@@ -259,8 +259,10 @@
     loadLeads();
   });
 
-  async function loadLeads() {
-    leadsList.innerHTML = `<div class="h-24 rounded-xl bg-elev animate-pulse"></div>`;
+  async function loadLeads(silent = false) {
+    if (!silent) {
+      leadsList.innerHTML = `<div class="h-24 rounded-xl bg-elev animate-pulse"></div>`;
+    }
     try {
       const qs = currentFilter ? `?status=${currentFilter}` : '';
       const res = await authedFetch(`/leads${qs}`);
@@ -311,10 +313,16 @@
               <span>Valor: <span class="text-ink">${formatMT(lead.estimated_price)}</span></span>
             </div>
 
-            <button data-lead-id="${lead.id}"
-                    class="whatsapp-btn w-full text-center border border-gold text-gold rounded-lg px-4 py-2 text-sm hover:bg-gold hover:text-bg transition-colors">
-              Abrir conversa no WhatsApp
-            </button>
+            <div class="flex gap-2">
+              <button data-lead-id="${lead.id}"
+                      class="whatsapp-btn flex-1 text-center border border-gold text-gold rounded-lg px-4 py-2 text-sm hover:bg-gold hover:text-bg transition-colors">
+                Abrir conversa no WhatsApp
+              </button>
+              <button data-lead-id="${lead.id}" aria-label="Eliminar pedido"
+                      class="delete-lead-btn shrink-0 border border-red-500/40 text-red-400 rounded-lg px-3 py-2 text-sm hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">
+                🗑
+              </button>
+            </div>
           </article>`;
       })
       .join('');
@@ -328,6 +336,25 @@
     leadsList.querySelectorAll('.whatsapp-btn').forEach((btn) => {
       btn.addEventListener('click', () => openWhatsApp(btn.dataset.leadId, btn));
     });
+
+    // Eliminar pedido
+    leadsList.querySelectorAll('.delete-lead-btn').forEach((btn) => {
+      btn.addEventListener('click', () => deleteLead(btn.dataset.leadId));
+    });
+  }
+
+  async function deleteLead(leadId) {
+    if (!confirm('Eliminar este pedido permanentemente? Esta ação não pode ser desfeita.')) return;
+    try {
+      const res = await authedFetch(`/leads/${leadId}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) throw new Error('Falha ao eliminar pedido.');
+      loadLeads(true);
+    } catch (err) {
+      if (err.message !== 'unauthorized') {
+        console.error(err);
+        alert('Não foi possível eliminar o pedido.');
+      }
+    }
   }
 
   async function updateLeadStatus(leadId, newStatus) {

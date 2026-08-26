@@ -98,6 +98,22 @@ async def update_lead_status(
     return _to_read_model(lead)
 
 
+@router.delete(
+    "/{lead_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(verify_admin_token)],
+)
+async def delete_lead(lead_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> None:
+    """[Admin] Remove um pedido de orçamento (reserva) permanentemente."""
+    lead = await db.get(BookingLead, lead_id)
+    if lead is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead não encontrado."
+        )
+    await db.delete(lead)
+    await db.commit()
+
+
 @router.get("/whatsapp-link/{lead_id}", response_model=WhatsAppLinkResponse)
 async def get_whatsapp_link(
     lead_id: uuid.UUID, db: AsyncSession = Depends(get_db)
