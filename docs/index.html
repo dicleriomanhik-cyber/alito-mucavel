@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>MC Alito Mucavel — Mestre de Cerimónias</title>
+<meta name="description" content="Alito Mucavel, Mestre de Cerimónias em Moçambique — casamentos, eventos corporativos, graduações, aniversários e xitiques. Peça o seu orçamento em minutos.">
+
+<!-- Tailwind via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#0A0E1A',
+          elev: '#121933',
+          elev2: '#1A2340',
+          gold: '#C9A24B',
+          goldsoft: '#E4CD8C',
+          ink: '#F3EFE4',
+          muted: '#8D95AC',
+          line: '#26304F',
+        },
+        fontFamily: {
+          display: ['"Fraunces"', 'serif'],
+          body: ['"Manrope"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<!-- Fontes: Fraunces (display, com itálico ornamental) + Manrope (corpo, leve para mobile) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* Elemento de assinatura: divisor ornamental de "programa de cerimónia" */
+  .rule-diamond {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .rule-diamond::before,
+  .rule-diamond::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, transparent, #C9A24B66, transparent);
+  }
+  .rule-diamond span {
+    width: 6px;
+    height: 6px;
+    background: #C9A24B;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* Scroll-snap leve para a galeria — sem bibliotecas JS pesadas */
+  .snap-row {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .snap-item { scroll-snap-align: start; }
+  .snap-row::-webkit-scrollbar { display: none; }
+  .snap-row { scrollbar-width: none; }
+
+  /* Foco visível para acessibilidade em teclado */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid #C9A24B;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeUp 0.7s ease-out forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Separador de categoria de evento (secção de pacotes) */
+  .cat-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid #26304F;
+    color: #8D95AC;
+    transition: all 0.2s ease;
+  }
+  .cat-tab.cat-tab-active {
+    background: #C9A24B;
+    border-color: #C9A24B;
+    color: #0A0E1A;
+  }
+</style>
+</head>
+
+<body class="bg-bg text-ink font-body antialiased">
+
+  <!-- ============ NAV ============ -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-bg/80 backdrop-blur-sm border-b border-line">
+    <div class="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+      <button id="profile-trigger" type="button"
+              class="flex items-center gap-2.5 group" aria-haspopup="dialog" aria-controls="profile-modal">
+        <span id="profile-avatar"
+              class="w-8 h-8 rounded-full bg-elev2 border border-gold/40 flex items-center justify-center text-[10px] text-gold overflow-hidden shrink-0 group-hover:border-gold transition-colors">
+          <!-- Preenchido por app.js: foto (se existir) ou iniciais -->
+        </span>
+        <span class="font-display italic text-lg tracking-wide group-hover:text-goldsoft transition-colors">MC Alito Mucavel</span>
+      </button>
+      <a href="#reserva"
+         class="text-xs uppercase tracking-widest text-gold border border-gold/40 rounded-full px-4 py-2 hover:bg-gold hover:text-bg transition-colors">
+        Reservar
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ MODAL: SOBRE O MC ============ -->
+  <div id="profile-modal" class="hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-labelledby="profile-modal-name">
+    <div id="profile-backdrop" class="absolute inset-0 bg-bg/80 backdrop-blur-sm"></div>
+    <div class="relative min-h-full flex items-end sm:items-center justify-center p-0 sm:p-5">
+      <div class="relative bg-elev border border-line sm:rounded-2xl rounded-t-2xl w-full sm:max-w-sm p-6 pb-8">
+        <button id="profile-close" type="button" aria-label="Fechar"
+                class="absolute top-4 right-4 text-muted hover:text-gold text-xl leading-none">✕</button>
+
+        <div class="flex flex-col items-center text-center pt-2">
+          <button id="profile-avatar-lg-btn" type="button" aria-label="Ver foto"
+                  class="w-20 h-20 rounded-full bg-elev2 border border-gold/40 overflow-hidden mb-4 hover:border-gold transition-colors">
+            <span id="profile-avatar-lg" class="w-full h-full flex items-center justify-center text-2xl text-gold"></span>
+          </button>
+          <p id="profile-modal-name" class="font-display italic text-2xl mb-1">—</p>
+          <p id="profile-modal-location" class="text-muted text-sm mb-1">—</p>
+          <a id="profile-modal-whatsapp" href="#" target="_blank" rel="noopener noreferrer"
+             class="text-gold text-sm hover:text-goldsoft mb-5 inline-flex items-center gap-1.5"></a>
+          <p class="rule-diamond text-[10px] uppercase tracking-[0.25em] text-muted mb-4 w-full"><span></span>Sobre<span></span></p>
+          <p id="profile-modal-bio" class="text-sm text-ink/90 leading-relaxed text-left"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: LIGHTBOX DA GALERIA (foto/vídeo, sem sair do site) ============ -->
+  <div id="lightbox-modal" class="hidden fixed inset-0 z-[70] bg-black" role="dialog" aria-modal="true">
+    <button id="lightbox-close" type="button" aria-label="Voltar"
+            class="absolute top-4 left-4 z-10 flex items-center gap-2 text-ink bg-bg/70 hover:bg-bg border border-line rounded-full px-4 py-2 text-sm backdrop-blur-sm">
+      <span aria-hidden="true">←</span> Voltar
+    </button>
+    <div class="w-full h-full flex items-center justify-center p-4">
+      <div id="lightbox-content" class="max-w-full max-h-full"></div>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <section class="relative pt-28 pb-14 px-5 overflow-hidden">
+    <!-- Fundo: substituir por foto real do MC em ação (palco/microfone) -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute inset-0 bg-gradient-to-b from-bg via-bg/70 to-bg"></div>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,#1A2340_0%,#0A0E1A_70%)]"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto w-full fade-up">
+      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-6"><span></span>Alito Mucavel · Mestre de Cerimónias<span></span></p>
+
+      <h1 class="font-display font-medium italic text-4xl sm:text-6xl leading-[1.05] mb-5">
+        A sua história merece <span class="text-goldsoft">ser bem narrada.</span>
+      </h1>
+
+      <p class="text-muted text-base sm:text-lg max-w-md mb-9">
+        Casamentos, eventos corporativos, graduações, aniversários e xitiques —
+        cada cerimónia conduzida com ritmo, elegância e presença de palco.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a href="#pacotes"
+           class="text-center bg-gold text-bg font-semibold px-6 py-3.5 rounded-lg hover:bg-goldsoft transition-colors">
+          Ver Pacotes
+        </a>
+        <a href="#reserva"
+           class="text-center border border-ink/25 px-6 py-3.5 rounded-lg hover:border-gold hover:text-gold transition-colors">
+          Simular Orçamento
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GALERIA ============ -->
+  <section id="galeria" class="py-16 px-5">
+    <div class="max-w-5xl mx-auto">
+      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Momentos<span></span></p>
+      <h2 class="font-display italic text-2xl sm:text-3xl mb-8">Alguns palcos já vividos</h2>
+    </div>
+
+    <div id="gallery-row" class="snap-row flex gap-4 overflow-x-auto px-5 max-w-5xl mx-auto pb-2">
+      <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/gallery -->
+      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
+      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
+      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
+    </div>
+  </section>
+
+  <!-- ============ PACOTES ============ -->
+  <section id="pacotes" class="py-16 px-5 bg-elev/40">
+    <div class="max-w-5xl mx-auto mb-6">
+      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Investimento<span></span></p>
+      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Pacotes à medida do seu evento</h2>
+      <p class="text-muted text-sm mb-6">Escolha o tipo de evento para ver o que está incluído.</p>
+
+      <!-- Categorias — deslize para o lado para ver todos os tipos de evento -->
+      <div id="category-tabs" class="snap-row flex gap-2 overflow-x-auto pb-1">
+        <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/event-info -->
+      </div>
+    </div>
+
+    <!-- Descrição/motivação da categoria selecionada -->
+    <div class="max-w-5xl mx-auto mb-6">
+      <p id="category-tagline" class="text-ink/90 text-base leading-relaxed"></p>
+    </div>
+
+    <!-- Pacotes da categoria selecionada — deslize para o lado (mesma lógica da galeria) -->
+    <div id="packages-row" class="snap-row flex gap-4 overflow-x-auto px-5 -mx-5 pb-2">
+      <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/packages?event_type=... -->
+      <div class="h-64 w-[88vw] sm:w-[500px] shrink-0 rounded-xl bg-elev2 animate-pulse"></div>
+    </div>
+  </section>
+
+  <!-- ============ FORMULÁRIO DE RESERVA ============ -->
+  <section id="reserva" class="py-16 px-5">
+    <div class="max-w-md mx-auto">
+      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Passo final<span></span></p>
+      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Simule o seu orçamento</h2>
+      <p class="text-muted text-sm mb-8">Preencha os dados — o valor atualiza em tempo real.</p>
+
+      <form id="booking-form" class="space-y-5" novalidate>
+        <div>
+          <label for="client_name" class="block text-xs uppercase tracking-widest text-muted mb-2">O seu nome</label>
+          <input id="client_name" name="client_name" type="text" required minlength="2"
+                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
+                 placeholder="Ex: Ana Cumbe">
+        </div>
+
+        <div>
+          <label for="client_phone" class="block text-xs uppercase tracking-widest text-muted mb-2">WhatsApp / Telefone</label>
+          <input id="client_phone" name="client_phone" type="tel" required minlength="8"
+                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
+                 placeholder="84xxxxxxx">
+        </div>
+
+        <div>
+          <label for="event_type" class="block text-xs uppercase tracking-widest text-muted mb-2">Tipo de evento</label>
+          <select id="event_type" name="event_type" required
+                  class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
+            <option value="">Selecione…</option>
+            <option value="Aniversário">Aniversário</option>
+            <option value="Casamento">Casamento</option>
+            <option value="Corporativo">Corporativo</option>
+            <option value="Graduação">Graduação</option>
+            <option value="Xitique">Xitique</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="event_date" class="block text-xs uppercase tracking-widest text-muted mb-2">Data do evento</label>
+          <input id="event_date" name="event_date" type="date" required
+                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
+        </div>
+
+        <div>
+          <label for="package_id" class="block text-xs uppercase tracking-widest text-muted mb-2">Pacote desejado</label>
+          <select id="package_id" name="package_id" required disabled
+                  class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none disabled:opacity-50">
+            <option value="">Escolha primeiro o tipo de evento</option>
+          </select>
+        </div>
+
+        <!-- Valor estimado, atualizado dinamicamente pelo app.js -->
+        <div class="rule-diamond text-muted/40 !gap-3 pt-2"><span></span><span class="text-[10px]">valor estimado</span><span></span></div>
+        <p class="text-center font-display italic text-3xl text-goldsoft" id="price-display">—</p>
+
+        <button type="submit" id="submit-btn"
+                class="w-full bg-gold text-bg font-semibold px-6 py-4 rounded-lg hover:bg-goldsoft transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Continuar no WhatsApp
+        </button>
+
+        <p id="form-error" class="text-red-400 text-sm text-center hidden" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="py-10 px-5 border-t border-line">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted">
+      <span>© <span id="year"></span> Alito Mucavel — Mestre de Cerimónias</span>
+      <span>Moçambique</span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>window.MC_API_BASE_URL = 'https://alito-mucavel.onrender.com/api/v1';</script>
+  <script src="app.js"></script>
+</body>
+</html>
