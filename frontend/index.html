@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>MC Alito Mucavel — Mestre de Cerimónias</title>
+<title>MC Alito Mucavel - Mestre de Cerimónias</title>
 <meta name="description" content="Alito Mucavel, Mestre de Cerimónias em Moçambique — casamentos, eventos corporativos, graduações, aniversários e xitiques. Peça o seu orçamento em minutos.">
 
 <!-- Tailwind via CDN -->
@@ -189,7 +189,7 @@
         </a>
         <a href="#reserva"
            class="text-center border border-ink/25 px-6 py-3.5 rounded-lg hover:border-gold hover:text-gold transition-colors">
-          Simular Orçamento
+          Reservar
         </a>
       </div>
     </div>
@@ -228,7 +228,7 @@
       <p id="category-tagline" class="text-ink/90 text-base leading-relaxed"></p>
     </div>
 
-    <!-- Pacotes da categoria selecionada — deslize para o lado (mesma lógica da galeria) -->
+    <!-- Pacotes da categoria selecionada - deslize para o lado (mesma lógica da galeria) -->
     <div id="packages-row" class="snap-row flex gap-4 overflow-x-auto px-5 -mx-5 pb-2">
       <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/packages?event_type=... -->
       <div class="h-64 w-[88vw] sm:w-[500px] shrink-0 rounded-xl bg-elev2 animate-pulse"></div>
@@ -239,8 +239,8 @@
   <section id="reserva" class="py-16 px-5">
     <div class="max-w-md mx-auto">
       <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Passo final<span></span></p>
-      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Simule o seu orçamento</h2>
-      <p class="text-muted text-sm mb-8">Preencha os dados — o valor atualiza em tempo real.</p>
+      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Reservar</h2>
+      <p class="text-muted text-sm mb-8">Preencha os dados</p>
 
       <form id="booking-form" class="space-y-5" novalidate>
         <div>
@@ -286,7 +286,7 @@
         </div>
 
         <!-- Valor estimado, atualizado dinamicamente pelo app.js -->
-        <div class="rule-diamond text-muted/40 !gap-3 pt-2"><span></span><span class="text-[10px]">valor estimado</span><span></span></div>
+        <div class="rule-diamond text-muted/40 !gap-3 pt-2"><span></span><span class="text-[10px]"></span><span></span></div>
         <p class="text-center font-display italic text-3xl text-goldsoft" id="price-display">—</p>
 
         <button type="submit" id="submit-btn"
@@ -301,7 +301,8 @@
 
   <footer class="py-10 px-5 border-t border-line">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted">
-      <span>© <span id="year"></span> Alito Mucavel — Mestre de Cerimónias</span>
+      <span>© <span id="year"></span> Alito Mucavel - Mestre de Cerimónias</span>
+      <span>Powered by SmartMetrics</span>
       <span>Moçambique</span>
     </div>
   </footer>
