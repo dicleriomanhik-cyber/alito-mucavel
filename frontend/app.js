@@ -252,10 +252,16 @@
       const orderedTypes = sortByCategoryOrder(seenTypes);
 
       // Separadores de categoria
+      // Mantém a categoria que o cliente já estava a ver (importante porque
+      // esta função corre também automaticamente a cada 3s).
+      const targetType = currentCategory && orderedTypes.includes(currentCategory)
+        ? currentCategory
+        : orderedTypes[0];
+
       categoryTabs.innerHTML = orderedTypes
         .map(
-          (type, i) =>
-            `<button data-type="${type}" class="cat-tab snap-item ${i === 0 ? 'cat-tab-active' : ''}">${type}</button>`
+          (type) =>
+            `<button data-type="${type}" class="cat-tab snap-item ${type === targetType ? 'cat-tab-active' : ''}">${type}</button>`
         )
         .join('');
 
@@ -263,7 +269,7 @@
         btn.addEventListener('click', () => selectCategory(btn.dataset.type));
       });
 
-      selectCategory(orderedTypes[0]);
+      selectCategory(targetType);
     } catch (err) {
       console.error(err);
       packagesRow.innerHTML = `<p class="text-muted text-sm px-1">Não foi possível carregar os pacotes neste momento.</p>`;
@@ -271,6 +277,7 @@
   }
 
   function selectCategory(eventType) {
+    const categoryChanged = currentCategory !== eventType;
     currentCategory = eventType;
 
     categoryTabs.querySelectorAll('.cat-tab').forEach((btn) => {
@@ -310,8 +317,11 @@
       });
     });
 
-    // Volta ao início do carrossel ao trocar de categoria
-    packagesRow.scrollTo({ left: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    // Volta ao início do carrossel só quando a categoria muda de facto
+    // (evita saltos indesejados durante a atualização automática a cada 3s).
+    if (categoryChanged) {
+      packagesRow.scrollTo({ left: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -415,7 +425,24 @@
       if (!linkRes.ok) throw new Error('Pedido gravado, mas falhou ao gerar o link do WhatsApp.');
 
       const { whatsapp_link } = await linkRes.json();
-      window.location.href = whatsapp_link;
+
+      // Abre o WhatsApp numa nova janela/app em vez de navegar a página atual —
+      // em telemóvel isto evita que o botão fique "preso" em 'A processar…'
+      // quando o telemóvel troca para a app do WhatsApp.
+      window.open(whatsapp_link, '_blank');
+
+      submitBtn.textContent = 'Pedido enviado ✓';
+      showError('');
+      form.reset();
+      priceDisplay.textContent = '—';
+      packageSelect.innerHTML = '<option value="">Escolha primeiro o tipo de evento</option>';
+      packageSelect.disabled = true;
+
+      // Repõe o botão ao fim de alguns segundos, para permitir um novo pedido.
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Continuar no WhatsApp';
+      }, 4000);
     } catch (err) {
       console.error(err);
       showError(err.message || 'Ocorreu um erro. Tente novamente.');
@@ -435,4 +462,13 @@
   loadProfile();
   loadGallery();
   loadPackagesOverview();
+
+  // Atualiza galeria e pacotes a cada 3s, para o cliente ver alterações
+  // feitas pelo Alito no painel admin sem precisar de dar refresh manual.
+  setInterval(() => {
+    if (!document.hidden) {
+      loadGallery();
+      loadPackagesOverview();
+    }
+  }, 3000);
 })();

@@ -122,13 +122,19 @@ async def get_whatsapp_link(
     profile = await db.get(MCProfile, 1)
     whatsapp_number = profile.whatsapp_number if profile else "258876050602"
 
+    # Mensagem escrita da perspetiva do CLIENTE, dirigida ao MC — é o cliente
+    # quem envia isto pelo WhatsApp, depois de simular o orçamento no site.
     message = (
-        f"Olá {lead.client_name}! Recebi o seu pedido de orçamento:\n\n"
-        f"📦 Pacote: {package_name}\n"
-        f"🎉 Tipo de evento: {lead.event_type}\n"
+        f"Olá! Sou {lead.client_name} 👋\n\n"
+        f"Estive a ver o seu site e fiquei muito interessado(a) em contratar "
+        f"os seus serviços para o meu evento. Aqui está o resumo do que "
+        f"simulei:\n\n"
+        f"🎉 Evento: {lead.event_type}\n"
         f"📅 Data: {lead.event_date.strftime('%d/%m/%Y')}\n"
+        f"📦 Pacote: {package_name}\n"
         f"💰 Valor estimado: {lead.estimated_price:.2f} MT\n\n"
-        f"Vamos confirmar os detalhes?"
+        f"Podemos conversar sobre os próximos passos e confirmar a "
+        f"disponibilidade para esta data?"
     )
 
     encoded_message = quote(message)

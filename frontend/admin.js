@@ -187,6 +187,8 @@
     }
   }
 
+  let leadsAutoRefreshTimer = null;
+
   function showPanel() {
     loginScreen.classList.add('hidden');
     adminPanel.classList.remove('hidden');
@@ -196,6 +198,13 @@
     loadPackagesAdmin();
     loadMediaAdmin();
     loadBlockedDates();
+
+    // Atualiza a lista de pedidos automaticamente a cada 3s, para o Alito
+    // ver novos pedidos sem precisar de dar refresh manual à página.
+    if (leadsAutoRefreshTimer) clearInterval(leadsAutoRefreshTimer);
+    leadsAutoRefreshTimer = setInterval(() => {
+      if (!document.hidden) loadLeads();
+    }, 3000);
   }
 
   // ---------------------------------------------------------------------
