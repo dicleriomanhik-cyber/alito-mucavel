@@ -20,6 +20,13 @@
   const submitBtn = document.getElementById('submit-btn');
   const errorEl = document.getElementById('form-error');
 
+  const reviewsList = document.getElementById('reviews-list');
+  const reviewForm = document.getElementById('review-form');
+  const reviewSubmitBtn = document.getElementById('review-submit-btn');
+  const reviewErrorEl = document.getElementById('review-form-error');
+  const reviewStarsContainer = document.getElementById('review-stars');
+  const reviewRatingInput = document.getElementById('review_rating');
+
   const profileTrigger = document.getElementById('profile-trigger');
   const profileModal = document.getElementById('profile-modal');
   const profileBackdrop = document.getElementById('profile-backdrop');
@@ -452,6 +459,129 @@
   });
 
   // ---------------------------------------------------------------------
+  // Avaliações/testemunhos de clientes
+  // ---------------------------------------------------------------------
+  let selectedRating = 0;
+
+  function paintStars(rating) {
+    reviewStarsContainer.querySelectorAll('.star-btn').forEach((btn) => {
+      const isFilled = Number(btn.dataset.star) <= rating;
+      btn.classList.toggle('text-gold', isFilled);
+      btn.classList.toggle('text-muted', !isFilled);
+    });
+  }
+
+  reviewStarsContainer.querySelectorAll('.star-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selectedRating = Number(btn.dataset.star);
+      reviewRatingInput.value = String(selectedRating);
+      paintStars(selectedRating);
+    });
+  });
+
+  function showReviewError(message) {
+    reviewErrorEl.textContent = message;
+    reviewErrorEl.classList.remove('hidden');
+  }
+
+  function clearReviewError() {
+    reviewErrorEl.classList.add('hidden');
+    reviewErrorEl.textContent = '';
+  }
+
+  function starsDisplay(n) {
+    return '★'.repeat(n) + '☆'.repeat(5 - n);
+  }
+
+  async function loadReviews() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/reviews`);
+      if (!res.ok) throw new Error('Falha ao carregar avaliações');
+      const reviews = await res.json();
+
+      if (!reviews.length) {
+        reviewsList.innerHTML = `<p class="text-muted text-sm px-1">Seja o primeiro a deixar uma avaliação!</p>`;
+        return;
+      }
+
+      reviewsList.innerHTML = reviews
+        .map(
+          (r) => `
+          <article class="snap-item shrink-0 w-[85vw] sm:w-96 rounded-xl p-5 border border-line bg-elev flex flex-col">
+            <p class="text-gold text-lg mb-2">${starsDisplay(r.rating)}</p>
+            <p class="text-ink/90 text-sm leading-relaxed mb-4 flex-1">"${r.comment}"</p>
+            <p class="font-display italic text-sm text-goldsoft">${r.client_name}</p>
+            ${r.event_type ? `<p class="text-muted text-xs">${r.event_type}</p>` : ''}
+          </article>`
+        )
+        .join('');
+    } catch (err) {
+      console.error(err);
+      reviewsList.innerHTML = `<p class="text-muted text-sm px-1">Não foi possível carregar as avaliações neste momento.</p>`;
+    }
+  }
+
+  reviewForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearReviewError();
+
+    const payload = {
+      client_name: document.getElementById('review_name').value.trim(),
+      event_type: document.getElementById('review_event_type').value || null,
+      rating: Number(reviewRatingInput.value),
+      comment: document.getElementById('review_comment').value.trim(),
+    };
+
+    if (!payload.client_name || payload.client_name.length < 2) {
+      showReviewError('Por favor indique o seu nome.');
+      return;
+    }
+    if (!payload.rating) {
+      showReviewError('Por favor escolha uma classificação de 1 a 5 estrelas.');
+      return;
+    }
+    if (!payload.comment || payload.comment.length < 3) {
+      showReviewError('Por favor escreva um breve comentário.');
+      return;
+    }
+
+    reviewSubmitBtn.disabled = true;
+    reviewSubmitBtn.textContent = 'A enviar…';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        const msg = Array.isArray(detail?.detail)
+          ? detail.detail.map((d) => d.msg).join(' | ')
+          : detail?.detail;
+        throw new Error(msg || 'Não foi possível enviar a avaliação.');
+      }
+
+      reviewForm.reset();
+      selectedRating = 0;
+      reviewRatingInput.value = '0';
+      paintStars(0);
+      reviewSubmitBtn.textContent = 'Obrigado ✓';
+      loadReviews();
+
+      setTimeout(() => {
+        reviewSubmitBtn.disabled = false;
+        reviewSubmitBtn.textContent = 'Enviar avaliação';
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      showReviewError(err.message || 'Ocorreu um erro. Tente novamente.');
+      reviewSubmitBtn.disabled = false;
+      reviewSubmitBtn.textContent = 'Enviar avaliação';
+    }
+  });
+
+  // ---------------------------------------------------------------------
   // Data mínima do input = hoje
   // ---------------------------------------------------------------------
   document.getElementById('event_date').min = new Date().toISOString().split('T')[0];
@@ -462,13 +592,15 @@
   loadProfile();
   loadGallery();
   loadPackagesOverview();
+  loadReviews();
 
-  // Atualiza galeria e pacotes a cada 3s, para o cliente ver alterações
-  // feitas pelo Alito no painel admin sem precisar de dar refresh manual.
+  // Atualiza galeria, pacotes e avaliações a cada 3s, para o cliente ver
+  // alterações feitas pelo Alito no painel admin sem precisar de dar refresh manual.
   setInterval(() => {
     if (!document.hidden) {
       loadGallery();
       loadPackagesOverview();
+      loadReviews();
     }
   }, 3000);
 })();

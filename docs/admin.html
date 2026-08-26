@@ -136,7 +136,39 @@
       </form>
     </section>
 
-    <!-- ---- Pedidos (Leads) ---- -->
+    <!-- ---- Segurança: palavra-passe personalizada do admin ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Segurança</h2>
+      <p class="text-muted text-xs mb-4">
+        Escolha a sua própria palavra-passe para entrar no painel admin,
+        em vez do token técnico usado até agora.
+      </p>
+
+      <form id="password-form" class="space-y-3 bg-elev border border-line rounded-xl p-4">
+        <div>
+          <label for="current-password" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Palavra-passe atual</label>
+          <input id="current-password" type="password" required
+                 placeholder="A que usou para entrar agora"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        </div>
+        <div>
+          <label for="new-password" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Nova palavra-passe</label>
+          <input id="new-password" type="password" required minlength="6"
+                 placeholder="Mínimo 6 caracteres"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold outline-none">
+        </div>
+        <div>
+          <label for="confirm-password" class="block text-xs uppercase tracking-widest text-muted mb-1.5">Confirmar nova palavra-passe</label>
+          <input id="confirm-password" type="password" required minlength="6"
+                 class="w-full bg-elev2 border border-line rounded-lg px-3 py-2 text-sm focus:border-gold outline-none">
+        </div>
+        <button type="submit"
+                class="w-full bg-gold text-bg font-semibold px-4 py-2.5 rounded-lg hover:bg-goldsoft transition-colors text-sm">
+          Alterar palavra-passe
+        </button>
+        <p id="password-feedback" class="text-sm text-center hidden"></p>
+      </form>
+    </section>
     <section class="mt-12">
       <h2 class="font-display italic text-xl mb-1">Pedidos de orçamento</h2>
       <p class="text-muted text-xs mb-4">
@@ -152,6 +184,18 @@
 
       <div id="leads-list" class="space-y-3">
         <div class="h-24 rounded-xl bg-elev animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- ---- Avaliações/testemunhos dos clientes ---- -->
+    <section class="mt-12">
+      <h2 class="font-display italic text-xl mb-1">Avaliações de clientes</h2>
+      <p class="text-muted text-xs mb-4">
+        Avaliações que os seus clientes deixam no site, depois do evento.
+        "Esconder" tira do site público sem apagar — "Eliminar" remove para sempre.
+      </p>
+      <div id="reviews-admin-list" class="space-y-3">
+        <div class="h-20 rounded-xl bg-elev animate-pulse"></div>
       </div>
     </section>
 

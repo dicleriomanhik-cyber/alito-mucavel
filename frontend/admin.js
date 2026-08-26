@@ -27,6 +27,13 @@
 
   const statusTabs = document.getElementById('status-tabs');
   const leadsList = document.getElementById('leads-list');
+  const reviewsAdminList = document.getElementById('reviews-admin-list');
+
+  const passwordForm = document.getElementById('password-form');
+  const currentPasswordInput = document.getElementById('current-password');
+  const newPasswordInput = document.getElementById('new-password');
+  const confirmPasswordInput = document.getElementById('confirm-password');
+  const passwordFeedback = document.getElementById('password-feedback');
 
   const blockedForm = document.getElementById('blocked-date-form');
   const blockedDateInput = document.getElementById('blocked-date-input');
@@ -198,12 +205,16 @@
     loadPackagesAdmin();
     loadMediaAdmin();
     loadBlockedDates();
+    loadReviewsAdmin();
 
-    // Atualiza a lista de pedidos automaticamente a cada 3s, para o Alito
-    // ver novos pedidos sem precisar de dar refresh manual à página.
+    // Atualiza pedidos e avaliações automaticamente a cada 3s, para o Alito
+    // ver novidades sem precisar de dar refresh manual à página.
     if (leadsAutoRefreshTimer) clearInterval(leadsAutoRefreshTimer);
     leadsAutoRefreshTimer = setInterval(() => {
-      if (!document.hidden) loadLeads(true);
+      if (!document.hidden) {
+        loadLeads(true);
+        loadReviewsAdmin(true);
+      }
     }, 3000);
   }
 
@@ -1000,6 +1011,151 @@
       if (err.message !== 'unauthorized') {
         console.error(err);
         alert('Não foi possível remover o item da galeria.');
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Segurança — trocar a palavra-passe do painel admin
+  // ---------------------------------------------------------------------
+  passwordForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const currentPassword = currentPasswordInput.value;
+    const newPassword = newPasswordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+
+    if (newPassword !== confirmPassword) {
+      showFeedback(passwordFeedback, 'As duas palavras-passe novas não coincidem.', true);
+      return;
+    }
+    if (newPassword.length < 6) {
+      showFeedback(passwordFeedback, 'A nova palavra-passe deve ter pelo menos 6 caracteres.', true);
+      return;
+    }
+
+    try {
+      const res = await authedFetch('/profile/admin-password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        throw new Error(detail?.detail || 'Não foi possível alterar a palavra-passe.');
+      }
+
+      // A palavra-passe mudou — atualiza o token guardado em memória para
+      // a nova, para a sessão atual continuar a funcionar sem novo login.
+      adminToken = newPassword;
+      passwordForm.reset();
+      showFeedback(passwordFeedback, 'Palavra-passe alterada com sucesso! Use-a no próximo login.');
+    } catch (err) {
+      if (err.message !== 'unauthorized') {
+        console.error(err);
+        showFeedback(passwordFeedback, err.message, true);
+      }
+    }
+  });
+
+  // ---------------------------------------------------------------------
+  // Avaliações/testemunhos — moderação no painel admin
+  // ---------------------------------------------------------------------
+  const REVIEW_STARS = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+  async function loadReviewsAdmin(silent = false) {
+    if (!silent) {
+      reviewsAdminList.innerHTML = `<div class="h-20 rounded-xl bg-elev animate-pulse"></div>`;
+    }
+    try {
+      const res = await authedFetch('/reviews?include_unpublished=true');
+      if (!res.ok) throw new Error('Falha ao carregar avaliações.');
+      const reviews = await res.json();
+      renderReviewsAdmin(reviews);
+    } catch (err) {
+      if (err.message !== 'unauthorized') {
+        console.error(err);
+        reviewsAdminList.innerHTML = `<p class="text-muted text-sm">Não foi possível carregar as avaliações.</p>`;
+      }
+    }
+  }
+
+  function renderReviewsAdmin(reviews) {
+    if (!reviews.length) {
+      reviewsAdminList.innerHTML = `<p class="text-muted text-sm">Ainda não há avaliações.</p>`;
+      return;
+    }
+
+    reviewsAdminList.innerHTML = reviews
+      .map(
+        (r) => `
+        <article class="bg-elev border border-line rounded-xl p-4 ${r.is_published ? '' : 'opacity-60'}">
+          <div class="flex items-start justify-between gap-3 mb-1.5">
+            <div>
+              <p class="font-semibold">${r.client_name}</p>
+              ${r.event_type ? `<p class="text-muted text-xs">${r.event_type}</p>` : ''}
+            </div>
+            <span class="text-gold text-sm shrink-0">${REVIEW_STARS(r.rating)}</span>
+          </div>
+          <p class="text-sm text-ink/90 leading-relaxed mb-3">${r.comment}</p>
+          <div class="flex gap-2">
+            <button data-review-id="${r.id}" data-publish="${!r.is_published}"
+                    class="review-toggle-btn flex-1 text-center border rounded-lg px-4 py-2 text-sm transition-colors ${
+                      r.is_published
+                        ? 'border-line text-muted hover:border-gold hover:text-gold'
+                        : 'border-gold text-gold hover:bg-gold hover:text-bg'
+                    }">
+              ${r.is_published ? 'Esconder do site' : 'Publicar no site'}
+            </button>
+            <button data-review-id="${r.id}" aria-label="Eliminar avaliação"
+                    class="review-delete-btn shrink-0 border border-red-500/40 text-red-400 rounded-lg px-3 py-2 text-sm hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">
+              🗑
+            </button>
+          </div>
+        </article>`
+      )
+      .join('');
+
+    reviewsAdminList.querySelectorAll('.review-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', () =>
+        toggleReviewPublished(btn.dataset.reviewId, btn.dataset.publish === 'true')
+      );
+    });
+    reviewsAdminList.querySelectorAll('.review-delete-btn').forEach((btn) => {
+      btn.addEventListener('click', () => deleteReview(btn.dataset.reviewId));
+    });
+  }
+
+  async function toggleReviewPublished(reviewId, newPublished) {
+    try {
+      const res = await authedFetch(`/reviews/${reviewId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_published: newPublished }),
+      });
+      if (!res.ok) throw new Error('Falha ao atualizar avaliação.');
+      loadReviewsAdmin(true);
+    } catch (err) {
+      if (err.message !== 'unauthorized') {
+        console.error(err);
+        alert('Não foi possível atualizar a avaliação.');
+      }
+    }
+  }
+
+  async function deleteReview(reviewId) {
+    if (!confirm('Eliminar esta avaliação permanentemente?')) return;
+    try {
+      const res = await authedFetch(`/reviews/${reviewId}`, { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) throw new Error('Falha ao eliminar avaliação.');
+      loadReviewsAdmin(true);
+    } catch (err) {
+      if (err.message !== 'unauthorized') {
+        console.error(err);
+        alert('Não foi possível eliminar a avaliação.');
       }
     }
   }
