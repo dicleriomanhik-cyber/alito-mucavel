@@ -55,3 +55,15 @@ async def init_models() -> None:
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+        # Migração leve para colunas novas em tabelas que já existiam antes
+        # desta coluna ser criada (create_all não altera tabelas existentes).
+        # Idempotente — corre em todos os arranques sem problema.
+        from sqlalchemy import text
+
+        await conn.execute(
+            text(
+                "ALTER TABLE mc_profile "
+                "ADD COLUMN IF NOT EXISTS admin_password_hash VARCHAR(255)"
+            )
+        )

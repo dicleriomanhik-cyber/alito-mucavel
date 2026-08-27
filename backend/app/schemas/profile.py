@@ -33,3 +33,10 @@ class MCProfileUpdate(BaseModel):
         if len(cleaned) < 9:
             raise ValueError("Número de WhatsApp inválido.")
         return cleaned
+
+
+class AdminPasswordChange(BaseModel):
+    """Payload para o MC escolher a sua própria palavra-passe do painel admin."""
+
+    current_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6, max_length=100)

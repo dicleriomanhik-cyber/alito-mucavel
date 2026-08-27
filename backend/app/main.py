@@ -11,14 +11,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_models
-from app.routers import availability, event_category, gallery, leads, packages, profile
+from app.routers import availability, event_category, gallery, leads, packages, profile, reviews
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Em produção real, substituir por migrações Alembic.
-    if settings.environment == "development":
-        await init_models()
+    # init_models() só cria o que ainda não existe (tabelas novas e colunas
+    # novas via ALTER TABLE IF NOT EXISTS) — seguro correr sempre, incluindo
+    # em produção, mesmo sem Alembic configurado.
+    await init_models()
     yield
 
 
@@ -43,6 +44,7 @@ app.include_router(leads.router, prefix=settings.api_v1_prefix)
 app.include_router(availability.router, prefix=settings.api_v1_prefix)
 app.include_router(profile.router, prefix=settings.api_v1_prefix)
 app.include_router(event_category.router, prefix=settings.api_v1_prefix)
+app.include_router(reviews.router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/health", tags=["Health"])

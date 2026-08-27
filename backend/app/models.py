@@ -153,6 +153,11 @@ class MCProfile(Base):
     whatsapp_number: Mapped[str] = mapped_column(
         String(20), nullable=False, default="258876050602"
     )
+    # Palavra-passe personalizada do painel admin, escolhida pelo próprio MC
+    # (guardada como hash, nunca em texto simples). Se for None, o sistema
+    # usa o ADMIN_TOKEN do .env/Render como valor de recurso (compatibilidade
+    # com o que já estava configurado antes desta funcionalidade existir).
+    admin_password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
@@ -175,3 +180,31 @@ class EventCategoryInfo(Base):
 
     def __repr__(self) -> str:
         return f"<EventCategoryInfo {self.event_type}>"
+
+
+class Review(Base):
+    """
+    Avaliação/testemunho deixado por um cliente final do MC (não pelo MC),
+    depois do evento. Exibido publicamente no site (quando aprovado), e
+    listado no painel admin para o Alito perceber onde pode melhorar.
+    """
+
+    __tablename__ = "reviews"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    client_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    event_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    rating: Mapped[int] = mapped_column(nullable=False)  # 1 a 5 estrelas
+    comment: Mapped[str] = mapped_column(Text, nullable=False)
+    # Só avaliações aprovadas aparecem no site público — dá ao Alito controlo
+    # editorial (ex: esconder um comentário injusto ou ofensivo) sem apagar
+    # o registo, que continua visível no painel admin.
+    is_published: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<Review {self.client_name} ({self.rating}★)>"
