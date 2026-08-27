@@ -140,6 +140,11 @@ async def get_whatsapp_link(
 
     # Mensagem escrita da perspetiva do CLIENTE, dirigida ao MC — é o cliente
     # quem envia isto pelo WhatsApp, depois de simular o orçamento no site.
+    payment_note = (
+        f"\n💳 Forma de pagamento: {profile.payment_terms}\n"
+        if profile and profile.payment_terms
+        else ""
+    )
     message = (
         f"Olá! Sou {lead.client_name} 👋\n\n"
         f"Estive a ver o seu site e fiquei muito interessado(a) em contratar "
@@ -148,7 +153,8 @@ async def get_whatsapp_link(
         f"🎉 Evento: {lead.event_type}\n"
         f"📅 Data: {lead.event_date.strftime('%d/%m/%Y')}\n"
         f"📦 Pacote: {package_name}\n"
-        f"💰 Valor estimado: {lead.estimated_price:.2f} MT\n\n"
+        f"💰 Valor estimado: {lead.estimated_price:.2f} MT\n"
+        f"{payment_note}\n"
         f"Podemos conversar sobre os próximos passos e confirmar a "
         f"disponibilidade para esta data?"
     )

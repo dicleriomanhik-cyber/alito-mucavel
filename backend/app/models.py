@@ -153,6 +153,10 @@ class MCProfile(Base):
     whatsapp_number: Mapped[str] = mapped_column(
         String(20), nullable=False, default="258876050602"
     )
+    # Condições de pagamento (ex: "50% para garantir a reserva, restante
+    # depois do evento") — texto livre definido pelo próprio MC, mostrado
+    # no formulário de reserva e incluído na mensagem de WhatsApp.
+    payment_terms: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Palavra-passe personalizada do painel admin, escolhida pelo próprio MC
     # (guardada como hash, nunca em texto simples). Se for None, o sistema
     # usa o ADMIN_TOKEN do .env/Render como valor de recurso (compatibilidade

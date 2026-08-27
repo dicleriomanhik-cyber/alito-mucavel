@@ -67,3 +67,9 @@ async def init_models() -> None:
                 "ADD COLUMN IF NOT EXISTS admin_password_hash VARCHAR(255)"
             )
         )
+        await conn.execute(
+            text(
+                "ALTER TABLE mc_profile "
+                "ADD COLUMN IF NOT EXISTS payment_terms TEXT"
+            )
+        )

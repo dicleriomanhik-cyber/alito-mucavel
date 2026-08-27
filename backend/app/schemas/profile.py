@@ -10,6 +10,7 @@ class MCProfileRead(BaseModel):
     bio: str
     photo_url: str | None
     whatsapp_number: str
+    payment_terms: str | None
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -23,6 +24,7 @@ class MCProfileUpdate(BaseModel):
     bio: str | None = None
     photo_url: str | None = Field(default=None, max_length=500)
     whatsapp_number: str | None = Field(default=None, max_length=20)
+    payment_terms: str | None = None
 
     @field_validator("whatsapp_number")
     @classmethod

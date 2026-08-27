@@ -16,6 +16,7 @@
   const eventTypeSelect = document.getElementById('event_type');
   const packageSelect = document.getElementById('package_id');
   const priceDisplay = document.getElementById('price-display');
+  const paymentTermsNote = document.getElementById('payment-terms-note');
   const form = document.getElementById('booking-form');
   const submitBtn = document.getElementById('submit-btn');
   const errorEl = document.getElementById('form-error');
@@ -107,6 +108,13 @@
         profileModalWhatsapp.classList.remove('hidden');
       } else {
         profileModalWhatsapp.classList.add('hidden');
+      }
+
+      if (profile.payment_terms) {
+        paymentTermsNote.textContent = `💳 ${profile.payment_terms}`;
+        paymentTermsNote.classList.remove('hidden');
+      } else {
+        paymentTermsNote.classList.add('hidden');
       }
     } catch (err) {
       console.error(err);

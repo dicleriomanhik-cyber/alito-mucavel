@@ -49,6 +49,7 @@
   const profileLocationInput = document.getElementById('profile-location');
   const profileWhatsappInput = document.getElementById('profile-whatsapp');
   const profileBioInput = document.getElementById('profile-bio');
+  const profilePaymentTermsInput = document.getElementById('profile-payment-terms');
   const profileFeedback = document.getElementById('profile-feedback');
 
   const packageForm = document.getElementById('package-form');
@@ -514,6 +515,7 @@
       profileLocationInput.value = profile.location || '';
       profileWhatsappInput.value = profile.whatsapp_number || '';
       profileBioInput.value = profile.bio || '';
+      profilePaymentTermsInput.value = profile.payment_terms || '';
     } catch (err) {
       if (err.message !== 'unauthorized') console.error(err);
     }
@@ -563,6 +565,7 @@
           location: profileLocationInput.value.trim(),
           whatsapp_number: profileWhatsappInput.value.trim(),
           bio: profileBioInput.value.trim(),
+          payment_terms: profilePaymentTermsInput.value.trim() || null,
         }),
       });
       if (!res.ok) {
