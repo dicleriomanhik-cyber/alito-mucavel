@@ -182,13 +182,13 @@
           const cover = item.thumbnail_url || item.url;
           return `
             <button type="button" data-url="${item.url}" data-type="${item.type}" data-title="${item.title}"
-               class="gallery-item snap-item shrink-0 w-[72vw] sm:w-64 text-left group">
+               class="gallery-item snap-item shrink-0 w-[72vw] sm:w-64 text-center group">
               <span class="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-elev2 border border-line shadow-card">
                 <img src="${cover}" alt="${item.title}" loading="lazy"
                      class="w-full h-full object-cover">
                 ${isVideo ? '<span class="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/90 text-gold px-2.5 py-1 rounded-full shadow-sm">▶ Vídeo</span>' : ''}
               </span>
-              <span class="block mt-2.5 text-sm font-semibold text-ink truncate">${item.title}</span>
+              <span class="block mt-2.5 text-sm font-semibold text-ink truncate text-center">${item.title}</span>
             </button>`;
         })
         .join('');
