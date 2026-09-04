@@ -13,52 +13,35 @@
     theme: {
       extend: {
         colors: {
-          bg: '#0A0E1A',
-          elev: '#121933',
-          elev2: '#1A2340',
-          gold: '#C9A24B',
-          goldsoft: '#E4CD8C',
-          ink: '#F3EFE4',
-          muted: '#8D95AC',
-          line: '#26304F',
+          bg: '#F2F7FF',
+          elev: '#FFFFFF',
+          elev2: '#EFF5FD',
+          gold: '#2563EB',
+          goldsoft: '#1D4ED8',
+          ink: '#0F172A',
+          muted: '#64748B',
+          line: '#DEE8F7',
         },
         fontFamily: {
-          display: ['"Fraunces"', 'serif'],
-          body: ['"Manrope"', 'sans-serif'],
+          display: ['"Plus Jakarta Sans"', 'sans-serif'],
+          body: ['"Inter"', 'sans-serif'],
+        },
+        boxShadow: {
+          card: '0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -12px rgba(37,99,235,0.18)',
+          soft: '0 12px 32px -16px rgba(37,99,235,0.28)',
         },
       },
     },
   };
 </script>
 
-<!-- Fontes: Fraunces (display, com itálico ornamental) + Manrope (corpo, leve para mobile) -->
+<!-- Fontes: Plus Jakarta Sans (títulos) + Inter (corpo) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Elemento de assinatura: divisor ornamental de "programa de cerimónia" */
-  .rule-diamond {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .rule-diamond::before,
-  .rule-diamond::after {
-    content: "";
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(90deg, transparent, #C9A24B66, transparent);
-  }
-  .rule-diamond span {
-    width: 6px;
-    height: 6px;
-    background: #C9A24B;
-    transform: rotate(45deg);
-    flex-shrink: 0;
-  }
-
-  /* Scroll-snap leve para a galeria — sem bibliotecas JS pesadas */
+  /* Scroll-snap leve para carrosséis em mobile — sem bibliotecas JS pesadas */
   .snap-row {
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -68,8 +51,8 @@
   .snap-row { scrollbar-width: none; }
 
   /* Foco visível para acessibilidade em teclado */
-  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
-    outline: 2px solid #C9A24B;
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid #2563EB;
     outline-offset: 2px;
   }
 
@@ -86,66 +69,104 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Separador de categoria de evento (secção de pacotes) */
+  /* Categorias de evento (secção de pacotes) */
   .cat-tab {
     flex-shrink: 0;
     white-space: nowrap;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.55rem 1.1rem;
     border-radius: 9999px;
-    border: 1px solid #26304F;
-    color: #8D95AC;
-    transition: all 0.2s ease;
+    background: #EFF5FD;
+    color: #64748B;
+    transition: all 0.15s ease;
   }
   .cat-tab.cat-tab-active {
-    background: #C9A24B;
-    border-color: #C9A24B;
-    color: #0A0E1A;
+    background: #2563EB;
+    color: #FFFFFF;
+    box-shadow: 0 8px 16px -8px rgba(37,99,235,0.5);
   }
+
+  /* Menu mobile */
+  #mobile-menu { transition: max-height 0.25s ease, opacity 0.2s ease; overflow: hidden; }
+  #mobile-menu.closed { max-height: 0; opacity: 0; }
+  #mobile-menu.open { max-height: 480px; opacity: 1; }
 </style>
 </head>
 
 <body class="bg-bg text-ink font-body antialiased">
 
   <!-- ============ NAV ============ -->
-  <header class="fixed top-0 inset-x-0 z-50 bg-bg/80 backdrop-blur-sm border-b border-line">
-    <div class="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between">
+  <header class="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur-sm border-b border-line">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-3.5 flex items-center justify-between gap-4">
       <button id="profile-trigger" type="button"
-              class="flex items-center gap-2.5 group" aria-haspopup="dialog" aria-controls="profile-modal">
+              class="flex items-center gap-2.5 group shrink-0" aria-haspopup="dialog" aria-controls="profile-modal">
         <span id="profile-avatar"
-              class="w-8 h-8 rounded-full bg-elev2 border border-gold/40 flex items-center justify-center text-[10px] text-gold overflow-hidden shrink-0 group-hover:border-gold transition-colors">
+              class="w-9 h-9 rounded-full bg-elev2 border border-gold/25 flex items-center justify-center text-[11px] font-bold text-gold overflow-hidden shrink-0">
           <!-- Preenchido por app.js: foto (se existir) ou iniciais -->
         </span>
-        <span class="font-display italic text-lg tracking-wide group-hover:text-goldsoft transition-colors">MC Alito Mucavel</span>
+        <span class="text-left leading-tight hidden xs:block">
+          <span class="block font-display font-bold text-sm sm:text-base text-ink">MC Alito Mucavel</span>
+          <span class="block text-[10px] font-semibold tracking-wide text-muted uppercase">Mestre de Cerimónias</span>
+        </span>
       </button>
-      <a href="#reserva"
-         class="text-xs uppercase tracking-widest text-gold border border-gold/40 rounded-full px-4 py-2 hover:bg-gold hover:text-bg transition-colors">
-        Reservar
-      </a>
+
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-muted">
+        <a href="#inicio" data-view="inicio" class="nav-link hover:text-gold transition-colors">Início</a>
+        <a href="#pacotes" data-view="pacotes" class="nav-link hover:text-gold transition-colors">Pacotes</a>
+        <a href="#galeria" data-view="momentos" class="nav-link hover:text-gold transition-colors">Momentos</a>
+        <a href="#avaliacoes" data-view="avaliacoes" class="nav-link hover:text-gold transition-colors">Avaliações</a>
+        <a href="#reserva" data-view="reserva" class="nav-link hover:text-gold transition-colors">Reservar</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="#reserva" data-view="reserva"
+           class="hidden sm:inline-flex items-center gap-1.5 text-sm bg-gold text-white font-semibold rounded-lg px-4 py-2.5 hover:bg-goldsoft transition-colors shadow-card">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Reservar agora
+        </a>
+        <button id="mobile-menu-btn" type="button" aria-label="Abrir menu" aria-expanded="false"
+                class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-line text-ink">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menu mobile -->
+    <div id="mobile-menu" class="closed lg:hidden border-t border-line bg-white">
+      <nav class="max-w-6xl mx-auto px-5 py-3 flex flex-col text-sm font-semibold text-ink divide-y divide-line">
+        <a href="#inicio" data-view="inicio" class="nav-link py-3">Início</a>
+        <a href="#pacotes" data-view="pacotes" class="nav-link py-3">Pacotes</a>
+        <a href="#galeria" data-view="momentos" class="nav-link py-3">Momentos</a>
+        <a href="#avaliacoes" data-view="avaliacoes" class="nav-link py-3">Avaliações</a>
+        <a href="#reserva" data-view="reserva" class="py-3 text-gold">Reservar agora →</a>
+      </nav>
     </div>
   </header>
 
+  <!-- Espaço reservado para compensar o header fixo quando a secção Início (com o seu próprio
+       espaçamento superior) não está visível -->
+  <div id="header-spacer" class="hidden h-16 sm:h-[68px]"></div>
+
   <!-- ============ MODAL: SOBRE O MC ============ -->
   <div id="profile-modal" class="hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-labelledby="profile-modal-name">
-    <div id="profile-backdrop" class="absolute inset-0 bg-bg/80 backdrop-blur-sm"></div>
+    <div id="profile-backdrop" class="absolute inset-0 bg-ink/40 backdrop-blur-sm"></div>
     <div class="relative min-h-full flex items-end sm:items-center justify-center p-0 sm:p-5">
-      <div class="relative bg-elev border border-line sm:rounded-2xl rounded-t-2xl w-full sm:max-w-sm p-6 pb-8">
+      <div class="relative bg-white border border-line sm:rounded-2xl rounded-t-2xl w-full sm:max-w-sm p-6 pb-8 shadow-soft">
         <button id="profile-close" type="button" aria-label="Fechar"
                 class="absolute top-4 right-4 text-muted hover:text-gold text-xl leading-none">✕</button>
 
         <div class="flex flex-col items-center text-center pt-2">
           <button id="profile-avatar-lg-btn" type="button" aria-label="Ver foto"
-                  class="w-20 h-20 rounded-full bg-elev2 border border-gold/40 overflow-hidden mb-4 hover:border-gold transition-colors">
-            <span id="profile-avatar-lg" class="w-full h-full flex items-center justify-center text-2xl text-gold"></span>
+                  class="w-20 h-20 rounded-full bg-elev2 border border-gold/25 overflow-hidden mb-4">
+            <span id="profile-avatar-lg" class="w-full h-full flex items-center justify-center text-2xl font-bold text-gold"></span>
           </button>
-          <p id="profile-modal-name" class="font-display italic text-2xl mb-1">—</p>
+          <p id="profile-modal-name" class="font-display font-bold text-xl mb-1">—</p>
           <p id="profile-modal-location" class="text-muted text-sm mb-1">—</p>
           <a id="profile-modal-whatsapp" href="#" target="_blank" rel="noopener noreferrer"
-             class="text-gold text-sm hover:text-goldsoft mb-5 inline-flex items-center gap-1.5"></a>
-          <p class="rule-diamond text-[10px] uppercase tracking-[0.25em] text-muted mb-4 w-full"><span></span>Sobre<span></span></p>
-          <p id="profile-modal-bio" class="text-sm text-ink/90 leading-relaxed text-left"></p>
+             class="text-gold text-sm font-semibold hover:text-goldsoft mb-5 inline-flex items-center gap-1.5"></a>
+          <p class="text-[11px] font-bold uppercase tracking-wide text-muted mb-3 w-full text-left">Sobre</p>
+          <p id="profile-modal-bio" class="text-sm text-ink/80 leading-relaxed text-left"></p>
         </div>
       </div>
     </div>
@@ -154,7 +175,7 @@
   <!-- ============ MODAL: LIGHTBOX DA GALERIA (foto/vídeo, sem sair do site) ============ -->
   <div id="lightbox-modal" class="hidden fixed inset-0 z-[70] bg-black" role="dialog" aria-modal="true">
     <button id="lightbox-close" type="button" aria-label="Voltar"
-            class="absolute top-4 left-4 z-10 flex items-center gap-2 text-ink bg-bg/70 hover:bg-bg border border-line rounded-full px-4 py-2 text-sm backdrop-blur-sm">
+            class="absolute top-4 left-4 z-10 flex items-center gap-2 text-white bg-black/50 hover:bg-black/70 rounded-full px-4 py-2 text-sm backdrop-blur-sm">
       <span aria-hidden="true">←</span> Voltar
     </button>
     <div class="w-full h-full flex items-center justify-center p-4">
@@ -163,104 +184,156 @@
   </div>
 
   <!-- ============ HERO ============ -->
-  <section class="relative pt-28 pb-14 px-5 overflow-hidden">
-    <!-- Fundo: substituir por foto real do MC em ação (palco/microfone) -->
-    <div class="absolute inset-0 -z-10">
-      <div class="absolute inset-0 bg-gradient-to-b from-bg via-bg/70 to-bg"></div>
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,#1A2340_0%,#0A0E1A_70%)]"></div>
-    </div>
+  <section id="inicio" class="relative pt-32 pb-10 px-5 sm:px-8 overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-bg"></div>
+    <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-200/40 blur-3xl -z-10"></div>
+    <div class="absolute top-40 -left-24 w-72 h-72 rounded-full bg-blue-100/60 blur-3xl -z-10"></div>
 
-    <div class="max-w-5xl mx-auto w-full fade-up">
-      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-6"><span></span>Alito Mucavel · Mestre de Cerimónias<span></span></p>
+    <div class="max-w-6xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-10 fade-up">
+      <div>
+        <p class="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gold mb-5">
+          <span class="w-5 h-px bg-gold"></span> Mestre de Cerimónias
+        </p>
 
-      <h1 class="font-display font-medium italic text-4xl sm:text-6xl leading-[1.05] mb-5">
-        A sua história merece <span class="text-goldsoft">ser bem narrada.</span>
-      </h1>
+        <h1 class="font-display font-extrabold text-4xl sm:text-5xl leading-[1.12] mb-5 text-ink">
+          A sua história<br>merece <span class="text-gold">ser bem narrada.</span>
+        </h1>
 
-      <p class="text-muted text-base sm:text-lg max-w-md mb-9">
-        Casamentos, eventos corporativos, graduações, aniversários e xitiques —
-        cada cerimónia conduzida com ritmo, elegância e presença de palco.
-      </p>
+        <p class="text-muted text-base sm:text-lg max-w-md mb-8 leading-relaxed">
+          Casamentos, eventos corporativos, graduações, aniversários e xitiques —
+          cada cerimónia conduzida com ritmo, elegância e presença de palco.
+        </p>
 
-      <div class="flex flex-col sm:flex-row gap-3">
-        <a href="#pacotes"
-           class="text-center bg-gold text-bg font-semibold px-6 py-3.5 rounded-lg hover:bg-goldsoft transition-colors">
-          Ver Pacotes
-        </a>
-        <a href="#reserva"
-           class="text-center border border-ink/25 px-6 py-3.5 rounded-lg hover:border-gold hover:text-gold transition-colors">
-          Reservar
-        </a>
+        <div class="flex flex-col sm:flex-row gap-3 mb-10">
+          <a href="#pacotes" data-view="pacotes"
+             class="text-center inline-flex items-center justify-center gap-2 bg-gold text-white font-semibold px-6 py-3.5 rounded-lg hover:bg-goldsoft transition-colors shadow-card">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Ver Pacotes
+          </a>
+          <a href="#reserva" data-view="reserva"
+             class="text-center inline-flex items-center justify-center gap-2 bg-white border border-line px-6 py-3.5 rounded-lg font-semibold hover:border-gold hover:text-gold transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.3A8.8 8.8 0 0 0 3.1 16.7L2 21l4.4-1.1a8.8 8.8 0 0 0 4.2 1.1h0a8.8 8.8 0 0 0 8.8-8.8 8.7 8.7 0 0 0-1.8-5.9Zm-6 13.5h0a7.3 7.3 0 0 1-3.7-1l-.3-.2-2.7.7.7-2.6-.2-.3a7.3 7.3 0 1 1 13.5-3.9 7.3 7.3 0 0 1-7.3 7.3Zm4-5.4c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.5.1s-.6.7-.7.9-.3.2-.5.1a6 6 0 0 1-1.7-1 6.6 6.6 0 0 1-1.2-1.5c-.1-.2 0-.3.1-.5l.4-.4.2-.4v-.4c0-.1-.5-1.3-.7-1.7-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.6.3 2.7 2.7 0 0 0-.9 2 4.7 4.7 0 0 0 1 2.5 10.6 10.6 0 0 0 4.1 3.6c.6.2 1 .4 1.4.5a3.3 3.3 0 0 0 1.5.1c.5-.1 1.3-.5 1.5-1s.2-.9.1-1c0-.2-.2-.2-.4-.3Z"/></svg>
+            Falar no WhatsApp
+          </a>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 max-w-md">
+          <div>
+            <span class="flex items-center justify-center w-9 h-9 rounded-full bg-elev2 text-gold mb-2">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
+            <p class="text-sm font-bold leading-tight">Presença de palco</p>
+            <p class="text-xs text-muted mt-0.5">Carisma e conexão</p>
+          </div>
+          <div>
+            <span class="flex items-center justify-center w-9 h-9 rounded-full bg-elev2 text-gold mb-2">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+            </span>
+            <p class="text-sm font-bold leading-tight">Voz e dicção</p>
+            <p class="text-xs text-muted mt-0.5">Clareza e impacto</p>
+          </div>
+          <div>
+            <span class="flex items-center justify-center w-9 h-9 rounded-full bg-elev2 text-gold mb-2">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+            </span>
+            <p class="text-sm font-bold leading-tight">Experiência</p>
+            <p class="text-xs text-muted mt-0.5">Profissionalismo total</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative mx-auto w-full max-w-sm lg:max-w-none">
+        <div class="relative rounded-3xl overflow-hidden shadow-soft border border-line aspect-[4/5] lg:aspect-auto lg:absolute lg:inset-0 bg-elev2">
+          <img id="hero-photo" src="" alt="" class="hidden w-full h-full object-cover">
+          <div id="hero-photo-placeholder" class="w-full h-full flex items-center justify-center text-gold/50">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          </div>
+        </div>
+
+        <div class="absolute -bottom-6 -left-4 sm:-left-8 bg-white rounded-2xl shadow-soft border border-line px-5 py-4 flex items-center gap-3">
+          <span class="flex items-center justify-center w-11 h-11 rounded-xl bg-elev2 text-gold shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <div>
+            <p id="hero-stat-count" class="font-display font-extrabold text-lg leading-none">100+</p>
+            <p id="hero-stat-label" class="text-muted text-xs mt-1">Eventos realizados</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ============ GALERIA ============ -->
-  <section id="galeria" class="py-16 px-5">
-    <div class="max-w-5xl mx-auto">
-      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Momentos<span></span></p>
-      <h2 class="font-display italic text-2xl sm:text-3xl mb-8">Alguns palcos já vividos</h2>
-    </div>
+  <section id="galeria" class="pt-6 pb-16 px-5 sm:px-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex items-end justify-between mb-8 gap-4">
+        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink">Momentos <span class="text-gold">inesquecíveis</span></h2>
+        <div class="hidden sm:flex gap-2">
+          <button id="gallery-prev" aria-label="Anterior" class="w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-gold hover:text-gold transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button id="gallery-next" aria-label="Seguinte" class="w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-gold hover:text-gold transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
 
-    <div id="gallery-row" class="snap-row flex gap-4 overflow-x-auto px-5 max-w-5xl mx-auto pb-2">
-      <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/gallery -->
-      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
-      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
-      <div class="snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl bg-elev animate-pulse"></div>
+      <div id="gallery-row" class="snap-row flex gap-4 overflow-x-auto pb-2 -mx-5 px-5 sm:mx-0 sm:px-0">
+        <div class="snap-item shrink-0 w-[72vw] sm:w-64 aspect-[4/3] rounded-2xl bg-elev2 animate-pulse"></div>
+        <div class="snap-item shrink-0 w-[72vw] sm:w-64 aspect-[4/3] rounded-2xl bg-elev2 animate-pulse"></div>
+        <div class="snap-item shrink-0 w-[72vw] sm:w-64 aspect-[4/3] rounded-2xl bg-elev2 animate-pulse"></div>
+        <div class="snap-item shrink-0 w-[72vw] sm:w-64 aspect-[4/3] rounded-2xl bg-elev2 animate-pulse"></div>
+      </div>
     </div>
   </section>
 
   <!-- ============ PACOTES ============ -->
-  <section id="pacotes" class="py-16 px-5 bg-elev/40">
-    <div class="max-w-5xl mx-auto mb-6">
-      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Investimento<span></span></p>
-      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Pacotes à medida do seu evento</h2>
-      <p class="text-muted text-sm mb-6">Escolha o tipo de evento para ver o que está incluído.</p>
+  <section id="pacotes" class="py-16 px-5 sm:px-8 bg-white border-y border-line">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-8">
+        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink mb-2">Pacotes <span class="text-gold">populares</span></h2>
+        <p class="text-muted text-sm sm:text-base">Escolha o tipo de evento para ver o que está incluído.</p>
+      </div>
 
-      <!-- Categorias — deslize para o lado para ver todos os tipos de evento -->
-      <div id="category-tabs" class="snap-row flex gap-2 overflow-x-auto pb-1">
+      <div id="category-tabs" class="snap-row flex gap-2 overflow-x-auto pb-1 mb-4 -mx-5 px-5 sm:mx-0 sm:px-0">
         <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/event-info -->
       </div>
-    </div>
 
-    <!-- Descrição/motivação da categoria selecionada -->
-    <div class="max-w-5xl mx-auto mb-6">
-      <p id="category-tagline" class="text-ink/90 text-base leading-relaxed"></p>
-    </div>
+      <p id="category-tagline" class="text-ink/80 text-sm sm:text-base leading-relaxed max-w-2xl mb-8"></p>
 
-    <!-- Pacotes da categoria selecionada - deslize para o lado (mesma lógica da galeria) -->
-    <div id="packages-row" class="snap-row flex gap-4 overflow-x-auto px-5 -mx-5 pb-2">
-      <!-- Preenchido dinamicamente por app.js a partir de GET /api/v1/packages?event_type=... -->
-      <div class="h-64 w-[88vw] sm:w-[500px] shrink-0 rounded-xl bg-elev2 animate-pulse"></div>
+      <div id="packages-row" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="h-72 rounded-2xl bg-elev2 animate-pulse"></div>
+        <div class="h-72 rounded-2xl bg-elev2 animate-pulse"></div>
+        <div class="h-72 rounded-2xl bg-elev2 animate-pulse"></div>
+      </div>
     </div>
   </section>
 
   <!-- ============ FORMULÁRIO DE RESERVA ============ -->
-  <section id="reserva" class="py-16 px-5">
+  <section id="reserva" class="py-16 px-5 sm:px-8">
     <div class="max-w-md mx-auto">
-      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Passo final<span></span></p>
-      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">Reservar</h2>
-      <p class="text-muted text-sm mb-8">Preencha os dados</p>
+      <h2 class="font-display font-extrabold text-2xl sm:text-3xl mb-2 text-ink">Reservar</h2>
+      <p class="text-muted text-sm mb-8">Preencha os dados e receba o seu orçamento no WhatsApp.</p>
 
-      <form id="booking-form" class="space-y-5" novalidate>
+      <form id="booking-form" class="space-y-5 bg-white border border-line rounded-2xl p-6 shadow-card" novalidate>
         <div>
-          <label for="client_name" class="block text-xs uppercase tracking-widest text-muted mb-2">O seu nome</label>
+          <label for="client_name" class="block text-sm font-semibold text-ink mb-1.5">O seu nome</label>
           <input id="client_name" name="client_name" type="text" required minlength="2"
-                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
+                 class="w-full bg-elev2 border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
                  placeholder="Ex: Ana Cumbe">
         </div>
 
         <div>
-          <label for="client_phone" class="block text-xs uppercase tracking-widest text-muted mb-2">WhatsApp / Telefone</label>
+          <label for="client_phone" class="block text-sm font-semibold text-ink mb-1.5">WhatsApp / Telefone</label>
           <input id="client_phone" name="client_phone" type="tel" required minlength="8"
-                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
+                 class="w-full bg-elev2 border border-line rounded-lg px-4 py-3 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
                  placeholder="84xxxxxxx">
         </div>
 
         <div>
-          <label for="event_type" class="block text-xs uppercase tracking-widest text-muted mb-2">Tipo de evento</label>
+          <label for="event_type" class="block text-sm font-semibold text-ink mb-1.5">Tipo de evento</label>
           <select id="event_type" name="event_type" required
-                  class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
+                  class="w-full bg-elev2 border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
             <option value="">Selecione…</option>
             <option value="Aniversário">Aniversário</option>
             <option value="Casamento">Casamento</option>
@@ -272,62 +345,64 @@
         </div>
 
         <div>
-          <label for="event_date" class="block text-xs uppercase tracking-widest text-muted mb-2">Data do evento</label>
+          <label for="event_date" class="block text-sm font-semibold text-ink mb-1.5">Data do evento</label>
           <input id="event_date" name="event_date" type="date" required
-                 class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
+                 class="w-full bg-elev2 border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none">
         </div>
 
         <div>
-          <label for="package_id" class="block text-xs uppercase tracking-widest text-muted mb-2">Pacote desejado</label>
+          <label for="package_id" class="block text-sm font-semibold text-ink mb-1.5">Pacote desejado</label>
           <select id="package_id" name="package_id" required disabled
-                  class="w-full bg-elev border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none disabled:opacity-50">
+                  class="w-full bg-elev2 border border-line rounded-lg px-4 py-3 text-ink focus:border-gold outline-none disabled:opacity-50">
             <option value="">Escolha primeiro o tipo de evento</option>
           </select>
         </div>
 
-        <!-- Valor estimado, atualizado dinamicamente pelo app.js -->
-        <div class="rule-diamond text-muted/40 !gap-3 pt-2"><span></span><span class="text-[10px]"></span><span></span></div>
-        <p class="text-center font-display italic text-3xl text-goldsoft" id="price-display">—</p>
-        <p id="payment-terms-note" class="text-center text-muted text-xs -mt-2 hidden"></p>
+        <div class="text-center pt-2 border-t border-line">
+          <p class="text-muted text-xs uppercase font-bold tracking-wide mt-4 mb-1">Valor estimado</p>
+          <p class="font-display font-extrabold text-3xl text-gold" id="price-display">—</p>
+          <p id="payment-terms-note" class="text-center text-muted text-xs mt-1 hidden"></p>
+        </div>
 
         <button type="submit" id="submit-btn"
-                class="w-full bg-gold text-bg font-semibold px-6 py-4 rounded-lg hover:bg-goldsoft transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full bg-gold text-white font-semibold px-6 py-4 rounded-lg hover:bg-goldsoft transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-card">
           Continuar no WhatsApp
         </button>
 
-        <p id="form-error" class="text-red-400 text-sm text-center hidden" role="alert"></p>
+        <p id="form-error" class="text-red-500 text-sm text-center hidden" role="alert"></p>
       </form>
     </div>
   </section>
 
   <!-- ============ AVALIAÇÕES DE CLIENTES ============ -->
-  <section id="avaliacoes" class="py-16 px-5 bg-elev/40">
-    <div class="max-w-5xl mx-auto">
-      <p class="rule-diamond text-[11px] uppercase tracking-[0.25em] text-muted mb-3"><span></span>Testemunhos<span></span></p>
-      <h2 class="font-display italic text-2xl sm:text-3xl mb-2">O que dizem os clientes</h2>
-      <p class="text-muted text-sm mb-8">Experiências reais de quem já contratou o Alito.</p>
+  <section id="avaliacoes" class="py-16 px-5 sm:px-8 bg-white border-t border-line">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-8">
+        <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-ink mb-2">O que dizem os <span class="text-gold">clientes</span></h2>
+        <p class="text-muted text-sm sm:text-base">Experiências reais de quem já contratou o Alito.</p>
+      </div>
 
       <!-- Lista de avaliações aprovadas — preenchida por app.js a partir de GET /api/v1/reviews -->
-      <div id="reviews-list" class="snap-row flex gap-4 overflow-x-auto -mx-5 px-5 pb-2 mb-10">
-        <div class="h-40 w-[85vw] sm:w-96 shrink-0 rounded-xl bg-elev2 animate-pulse"></div>
+      <div id="reviews-list" class="snap-row flex gap-4 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0 pb-2 mb-12">
+        <div class="h-44 w-[85vw] sm:w-96 shrink-0 rounded-2xl bg-elev2 animate-pulse"></div>
       </div>
 
       <!-- Formulário para o cliente deixar a sua avaliação -->
-      <div class="max-w-md mx-auto bg-elev border border-line rounded-xl p-6">
-        <p class="font-display italic text-lg mb-4 text-center">Já foi cliente? Deixe a sua avaliação</p>
+      <div class="max-w-md mx-auto bg-elev2/60 border border-line rounded-2xl p-6">
+        <p class="font-display font-bold text-lg mb-4 text-center text-ink">Já foi cliente? Deixe a sua avaliação</p>
 
         <form id="review-form" class="space-y-4" novalidate>
           <div>
-            <label for="review_name" class="block text-xs uppercase tracking-widest text-muted mb-2">O seu nome</label>
+            <label for="review_name" class="block text-sm font-semibold text-ink mb-1.5">O seu nome</label>
             <input id="review_name" name="review_name" type="text" required minlength="2"
-                   class="w-full bg-elev2 border border-line rounded-lg px-4 py-2.5 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
+                   class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-ink placeholder:text-muted/60 focus:border-gold outline-none"
                    placeholder="Ex: Ana Cumbe">
           </div>
 
           <div>
-            <label for="review_event_type" class="block text-xs uppercase tracking-widest text-muted mb-2">Tipo de evento (opcional)</label>
+            <label for="review_event_type" class="block text-sm font-semibold text-ink mb-1.5">Tipo de evento (opcional)</label>
             <select id="review_event_type" name="review_event_type"
-                    class="w-full bg-elev2 border border-line rounded-lg px-4 py-2.5 text-ink focus:border-gold outline-none">
+                    class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-ink focus:border-gold outline-none">
               <option value="">Não especificar</option>
               <option value="Aniversário">Aniversário</option>
               <option value="Casamento">Casamento</option>
@@ -339,7 +414,7 @@
           </div>
 
           <div>
-            <label class="block text-xs uppercase tracking-widest text-muted mb-2">Classificação</label>
+            <label class="block text-sm font-semibold text-ink mb-1.5">Classificação</label>
             <div id="review-stars" class="flex gap-1.5 text-3xl" role="radiogroup" aria-label="Classificação de 1 a 5 estrelas">
               <button type="button" data-star="1" class="star-btn text-muted hover:text-gold transition-colors" aria-label="1 estrela">★</button>
               <button type="button" data-star="2" class="star-btn text-muted hover:text-gold transition-colors" aria-label="2 estrelas">★</button>
@@ -351,25 +426,25 @@
           </div>
 
           <div>
-            <label for="review_comment" class="block text-xs uppercase tracking-widest text-muted mb-2">Comentário</label>
+            <label for="review_comment" class="block text-sm font-semibold text-ink mb-1.5">Comentário</label>
             <textarea id="review_comment" name="review_comment" required minlength="3" rows="3"
-                      class="w-full bg-elev2 border border-line rounded-lg px-4 py-2.5 text-ink placeholder:text-muted/60 focus:border-gold outline-none resize-none"
+                      class="w-full bg-white border border-line rounded-lg px-4 py-2.5 text-ink placeholder:text-muted/60 focus:border-gold outline-none resize-none"
                       placeholder="Conte-nos como foi a sua experiência…"></textarea>
           </div>
 
           <button type="submit" id="review-submit-btn"
-                  class="w-full bg-gold text-bg font-semibold px-6 py-3 rounded-lg hover:bg-goldsoft transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="w-full bg-gold text-white font-semibold px-6 py-3 rounded-lg hover:bg-goldsoft transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             Enviar avaliação
           </button>
 
-          <p id="review-form-error" class="text-red-400 text-sm text-center hidden" role="alert"></p>
+          <p id="review-form-error" class="text-red-500 text-sm text-center hidden" role="alert"></p>
         </form>
       </div>
     </div>
   </section>
 
-  <footer class="py-10 px-5 border-t border-line">
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted">
+  <footer class="py-10 px-5 sm:px-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted">
       <span>© <span id="year"></span> Alito Mucavel - Mestre de Cerimónias</span>
       <span>Powered by SmartMetrics</span>
       <span>Moçambique</span>
@@ -378,6 +453,72 @@
 
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
   <script>window.MC_API_BASE_URL = 'https://alito-mucavel.onrender.com/api/v1';</script>
+  <script>
+    // Menu mobile
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.contains('open');
+      mobileMenu.classList.toggle('open', !isOpen);
+      mobileMenu.classList.toggle('closed', isOpen);
+      mobileMenuBtn.setAttribute('aria-expanded', String(!isOpen));
+    });
+    mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
+      mobileMenu.classList.add('closed');
+      mobileMenu.classList.remove('open');
+    }));
+
+    // Setas do carrossel de galeria (desktop)
+    const galleryRowEl = document.getElementById('gallery-row');
+    document.getElementById('gallery-prev').addEventListener('click', () => galleryRowEl.scrollBy({ left: -280, behavior: 'smooth' }));
+    document.getElementById('gallery-next').addEventListener('click', () => galleryRowEl.scrollBy({ left: 280, behavior: 'smooth' }));
+
+    // ============ NAVEGAÇÃO POR VISTAS ============
+    // A vista "inicio" agrupa Hero + Momentos (a página Início termina em Momentos inesquecíveis).
+    // As restantes vistas mostram apenas a sua própria secção — só aparecem ao clicar no menu.
+    const VIEWS = {
+      inicio: ['inicio', 'galeria'],
+      pacotes: ['pacotes'],
+      momentos: ['galeria'],
+      avaliacoes: ['avaliacoes'],
+      reserva: ['reserva'],
+    };
+    const ALL_SECTION_IDS = ['inicio', 'galeria', 'pacotes', 'reserva', 'avaliacoes'];
+    const headerSpacer = document.getElementById('header-spacer');
+
+    function activateView(viewName, { scroll = true } = {}) {
+      const activeSections = VIEWS[viewName] || VIEWS.inicio;
+      const resolvedView = VIEWS[viewName] ? viewName : 'inicio';
+
+      ALL_SECTION_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !activeSections.includes(id));
+      });
+
+      // O Hero já tem espaçamento próprio para o header fixo; as outras vistas precisam do espaçador.
+      headerSpacer.classList.toggle('hidden', resolvedView === 'inicio');
+
+      document.querySelectorAll('a.nav-link[data-view]').forEach((el) => {
+        el.classList.toggle('text-gold', el.dataset.view === resolvedView);
+      });
+
+      const hashId = activeSections[activeSections.length - 1] === 'galeria' && resolvedView === 'momentos' ? 'galeria' : activeSections[0];
+      history.replaceState(null, '', '#' + hashId);
+
+      if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-view]');
+      if (!trigger) return;
+      e.preventDefault();
+      activateView(trigger.dataset.view);
+    });
+
+    const HASH_TO_VIEW = { inicio: 'inicio', galeria: 'momentos', pacotes: 'pacotes', avaliacoes: 'avaliacoes', reserva: 'reserva' };
+    const initialHash = (window.location.hash || '#inicio').slice(1);
+    activateView(HASH_TO_VIEW[initialHash] || 'inicio', { scroll: false });
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

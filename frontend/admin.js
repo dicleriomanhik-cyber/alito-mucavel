@@ -63,6 +63,24 @@
 
   const eventInfoList = document.getElementById('event-info-list');
 
+  // Elementos do dashboard / navegação (podem não existir em versões antigas do HTML)
+  const topbarName = document.getElementById('topbar-name');
+  const topbarAvatar = document.getElementById('topbar-avatar');
+  const statPedidos = document.getElementById('stat-pedidos');
+  const statAvaliacoes = document.getElementById('stat-avaliacoes');
+  const statPacotes = document.getElementById('stat-pacotes');
+  const statGaleria = document.getElementById('stat-galeria');
+  const badgePedidos = document.getElementById('badge-pedidos');
+  const badgeAvaliacoes = document.getElementById('badge-avaliacoes');
+  const recentLeadsList = document.getElementById('recent-leads-list');
+  const recentReviewsList = document.getElementById('recent-reviews-list');
+
+  function setBadge(el, count) {
+    if (!el) return;
+    el.textContent = String(count);
+    el.classList.toggle('hidden', !count);
+  }
+
   const mediaForm = document.getElementById('media-form');
   const mediaTitleInput = document.getElementById('media-title');
   const mediaTypeInput = document.getElementById('media-type');
@@ -77,9 +95,9 @@
 
   const STATUS_LABELS = { pending: 'Pendente', contacted: 'Contactado', closed: 'Confirmado' };
   const STATUS_COLORS = {
-    pending: 'text-goldsoft border-gold/40',
-    contacted: 'text-blue-300 border-blue-400/40',
-    closed: 'text-green-300 border-green-400/40',
+    pending: 'text-amber-600 border-amber-300 bg-amber-50',
+    contacted: 'text-blue-600 border-blue-300 bg-blue-50',
+    closed: 'text-green-600 border-green-300 bg-green-50',
   };
 
   const formatMT = (value) =>
@@ -281,12 +299,40 @@
       if (!res.ok) throw new Error('Falha ao carregar pedidos.');
       const leads = await res.json();
       renderLeads(leads);
+
+      // Estatísticas do dashboard só são fiáveis quando não há filtro aplicado.
+      if (!currentFilter) {
+        if (statPedidos) statPedidos.textContent = String(leads.length);
+        setBadge(badgePedidos, leads.filter((l) => l.status === 'pending').length);
+        renderRecentLeads(leads);
+      }
     } catch (err) {
       if (err.message !== 'unauthorized') {
         console.error(err);
         leadsList.innerHTML = `<p class="text-muted text-sm">Não foi possível carregar os pedidos.</p>`;
       }
     }
+  }
+
+  function renderRecentLeads(leads) {
+    if (!recentLeadsList) return;
+    if (!leads.length) {
+      recentLeadsList.innerHTML = `<p class="text-muted text-sm">Nenhum pedido ainda.</p>`;
+      return;
+    }
+    recentLeadsList.innerHTML = leads
+      .slice(0, 4)
+      .map(
+        (lead) => `
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold truncate">${lead.client_name}</p>
+            <p class="text-muted text-xs">${lead.event_type} · ${formatDate(lead.event_date)}</p>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full border shrink-0 ${STATUS_COLORS[lead.status] || 'text-muted border-line'}">${STATUS_LABELS[lead.status] || lead.status}</span>
+        </div>`
+      )
+      .join('');
   }
 
   function renderLeads(leads) {
@@ -327,7 +373,7 @@
 
             <div class="flex gap-2">
               <button data-lead-id="${lead.id}"
-                      class="whatsapp-btn flex-1 text-center border border-gold text-gold rounded-lg px-4 py-2 text-sm hover:bg-gold hover:text-bg transition-colors">
+                      class="whatsapp-btn flex-1 text-center border border-gold text-gold rounded-lg px-4 py-2 text-sm hover:bg-gold hover:text-white transition-colors">
                 Abrir conversa no WhatsApp
               </button>
               <button data-lead-id="${lead.id}" aria-label="Eliminar pedido"
@@ -511,6 +557,15 @@
       const profile = await res.json();
       profilePhotoUrlInput.value = profile.photo_url || '';
       updateProfilePhotoPreview(profile.photo_url);
+
+      const firstName = (profile.full_name || 'Alito').trim().split(' ')[0];
+      if (topbarName) topbarName.textContent = `${firstName}!`;
+      if (topbarAvatar) {
+        topbarAvatar.innerHTML = profile.photo_url
+          ? `<img src="${profile.photo_url}" alt="" class="w-full h-full object-cover">`
+          : firstName.charAt(0).toUpperCase();
+      }
+
       profileFullNameInput.value = profile.full_name || '';
       profileLocationInput.value = profile.location || '';
       profileWhatsappInput.value = profile.whatsapp_number || '';
@@ -595,6 +650,7 @@
       const packages = await res.json();
       allPackagesCache = packages;
       renderPackagesAdmin(packages);
+      if (statPacotes) statPacotes.textContent = String(packages.filter((p) => p.is_active).length);
     } catch (err) {
       if (err.message !== 'unauthorized') {
         console.error(err);
@@ -846,6 +902,7 @@
       if (!res.ok) throw new Error('Falha ao carregar galeria.');
       const items = await res.json();
       renderMediaAdmin(items);
+      if (statGaleria) statGaleria.textContent = String(items.length);
     } catch (err) {
       if (err.message !== 'unauthorized') {
         console.error(err);
@@ -1078,12 +1135,37 @@
       if (!res.ok) throw new Error('Falha ao carregar avaliações.');
       const reviews = await res.json();
       renderReviewsAdmin(reviews);
+
+      if (statAvaliacoes) statAvaliacoes.textContent = String(reviews.length);
+      setBadge(badgeAvaliacoes, reviews.filter((r) => !r.is_published).length);
+      renderRecentReviews(reviews);
     } catch (err) {
       if (err.message !== 'unauthorized') {
         console.error(err);
         reviewsAdminList.innerHTML = `<p class="text-muted text-sm">Não foi possível carregar as avaliações.</p>`;
       }
     }
+  }
+
+  function renderRecentReviews(reviews) {
+    if (!recentReviewsList) return;
+    if (!reviews.length) {
+      recentReviewsList.innerHTML = `<p class="text-muted text-sm">Ainda não há avaliações.</p>`;
+      return;
+    }
+    recentReviewsList.innerHTML = reviews
+      .slice(0, 4)
+      .map(
+        (r) => `
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold truncate">${r.client_name}</p>
+            <p class="text-gold text-xs">${REVIEW_STARS(r.rating)}</p>
+          </div>
+          ${r.is_published ? '' : '<span class="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-300 px-2 py-1 rounded-full shrink-0">Por rever</span>'}
+        </div>`
+      )
+      .join('');
   }
 
   function renderReviewsAdmin(reviews) {
@@ -1109,7 +1191,7 @@
                     class="review-toggle-btn flex-1 text-center border rounded-lg px-4 py-2 text-sm transition-colors ${
                       r.is_published
                         ? 'border-line text-muted hover:border-gold hover:text-gold'
-                        : 'border-gold text-gold hover:bg-gold hover:text-bg'
+                        : 'border-gold text-gold hover:bg-gold hover:text-white'
                     }">
               ${r.is_published ? 'Esconder do site' : 'Publicar no site'}
             </button>

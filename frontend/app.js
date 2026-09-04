@@ -39,6 +39,10 @@
   const profileModalLocation = document.getElementById('profile-modal-location');
   const profileModalWhatsapp = document.getElementById('profile-modal-whatsapp');
   const profileModalBio = document.getElementById('profile-modal-bio');
+  const heroPhoto = document.getElementById('hero-photo');
+  const heroPhotoPlaceholder = document.getElementById('hero-photo-placeholder');
+  const heroStatCount = document.getElementById('hero-stat-count');
+  const heroStatLabel = document.getElementById('hero-stat-label');
 
   /** Cache local dos pacotes do tipo de evento atualmente selecionado, por id. */
   let currentEventPackages = {};
@@ -97,6 +101,17 @@
       profileAvatar.innerHTML = avatarContent;
       profileAvatarLg.innerHTML = avatarContent;
       profileAvatarLgBtn.dataset.photoUrl = profile.photo_url || '';
+
+      if (profile.photo_url) {
+        heroPhoto.src = profile.photo_url;
+        heroPhoto.alt = profile.full_name || 'MC Alito Mucavel';
+        heroPhoto.classList.remove('hidden');
+        heroPhotoPlaceholder.classList.add('hidden');
+      } else {
+        heroPhoto.classList.add('hidden');
+        heroPhotoPlaceholder.classList.remove('hidden');
+      }
+
       profileModalName.textContent = profile.full_name || '—';
       profileModalLocation.textContent = profile.location || '—';
       profileModalBio.textContent = profile.bio || 'Em breve, mais sobre o meu percurso por aqui.';
@@ -167,12 +182,13 @@
           const cover = item.thumbnail_url || item.url;
           return `
             <button type="button" data-url="${item.url}" data-type="${item.type}" data-title="${item.title}"
-               class="gallery-item snap-item shrink-0 w-[78vw] sm:w-72 aspect-[4/5] rounded-xl overflow-hidden relative bg-elev group text-left">
-              <img src="${cover}" alt="${item.title}" loading="lazy"
-                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-transparent to-transparent"></div>
-              ${isVideo ? '<span class="absolute top-3 right-3 text-[10px] uppercase tracking-widest bg-gold text-bg px-2 py-1 rounded-full">Vídeo</span>' : ''}
-              <span class="absolute bottom-3 left-3 right-3 text-sm font-medium">${item.title}</span>
+               class="gallery-item snap-item shrink-0 w-[72vw] sm:w-64 text-left group">
+              <span class="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-elev2 border border-line shadow-card">
+                <img src="${cover}" alt="${item.title}" loading="lazy"
+                     class="w-full h-full object-cover">
+                ${isVideo ? '<span class="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide bg-white/90 text-gold px-2.5 py-1 rounded-full shadow-sm">▶ Vídeo</span>' : ''}
+              </span>
+              <span class="block mt-2.5 text-sm font-semibold text-ink truncate">${item.title}</span>
             </button>`;
         })
         .join('');
@@ -303,20 +319,29 @@
     categoryTagline.classList.toggle('hidden', !taglinesByEventType[eventType]);
 
     const items = packagesByEventType[eventType] || [];
+    const PKG_ICONS = [
+      '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+      '<path d="M2 8l4 3 6-7 6 7 4-3-2 11H4L2 8Z"/>',
+      '<path d="M6 3h12l3 5-9 13L3 8l3-5Z"/><path d="M3 8h18"/><path d="M9 3l3 5-3 13"/><path d="M15 3l-3 5 3 13"/>',
+    ];
     packagesRow.innerHTML = items
       .map(
-        (pkg) => `
-        <article class="snap-item shrink-0 w-[88vw] sm:w-[500px] rounded-xl p-6 border border-gold/40 bg-elev flex flex-col">
-          <h4 class="font-display italic text-xl mb-2">${pkg.name}</h4>
-          <p class="text-ink/85 text-sm leading-relaxed mb-4 whitespace-pre-line">${pkg.description}</p>
-          <p class="font-display text-2xl text-goldsoft mb-4">${formatMT(pkg.base_price)}</p>
-          <ul class="text-sm space-y-2.5 mb-6 flex-1">
+        (pkg, i) => `
+        <article class="rounded-2xl p-6 border border-line bg-white shadow-card flex flex-col hover:border-gold/50 transition-colors">
+          <span class="flex items-center justify-center w-11 h-11 rounded-xl bg-elev2 text-gold mb-4 shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PKG_ICONS[i % PKG_ICONS.length]}</svg>
+          </span>
+          <h4 class="font-display font-bold text-lg mb-1.5 text-ink">${pkg.name}</h4>
+          <p class="text-muted text-sm leading-relaxed mb-4 whitespace-pre-line">${pkg.description}</p>
+          <ul class="text-sm space-y-2 mb-5 flex-1">
             ${(pkg.features || [])
-              .map((f) => `<li class="flex gap-2"><span class="text-gold shrink-0">·</span><span>${f}</span></li>`)
+              .map((f) => `<li class="flex gap-2"><span class="text-gold shrink-0 mt-0.5">✓</span><span class="text-ink/80">${f}</span></li>`)
               .join('')}
           </ul>
-          <a href="#reserva" data-event-type="${pkg.event_type}" data-package-id="${pkg.id}"
-             class="package-select-link text-center border border-ink/25 rounded-lg px-4 py-2.5 text-sm hover:bg-gold hover:text-bg hover:border-gold transition-colors">
+          <p class="text-muted text-xs font-semibold uppercase tracking-wide mb-1">A partir de</p>
+          <p class="font-display font-extrabold text-2xl text-gold mb-4">${formatMT(pkg.base_price)}</p>
+          <a href="#reserva" data-view="reserva" data-event-type="${pkg.event_type}" data-package-id="${pkg.id}"
+             class="package-select-link text-center border border-line rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-gold hover:text-white hover:border-gold transition-colors">
             Escolher este pacote
           </a>
         </article>`
@@ -515,14 +540,22 @@
       reviewsList.innerHTML = reviews
         .map(
           (r) => `
-          <article class="snap-item shrink-0 w-[85vw] sm:w-96 rounded-xl p-5 border border-line bg-elev flex flex-col">
+          <article class="snap-item shrink-0 w-[85vw] sm:w-96 rounded-2xl p-5 border border-line bg-white shadow-card flex flex-col">
             <p class="text-gold text-lg mb-2">${starsDisplay(r.rating)}</p>
-            <p class="text-ink/90 text-sm leading-relaxed mb-4 flex-1">"${r.comment}"</p>
-            <p class="font-display italic text-sm text-goldsoft">${r.client_name}</p>
-            ${r.event_type ? `<p class="text-muted text-xs">${r.event_type}</p>` : ''}
+            <p class="text-ink/85 text-sm leading-relaxed mb-4 flex-1">“${r.comment}”</p>
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-full bg-elev2 text-gold text-xs font-bold flex items-center justify-center shrink-0">${(r.client_name || '?').trim().charAt(0).toUpperCase()}</span>
+              <div>
+                <p class="font-display font-bold text-sm text-ink">${r.client_name}</p>
+                ${r.event_type ? `<p class="text-muted text-xs">${r.event_type}</p>` : ''}
+              </div>
+            </div>
           </article>`
         )
         .join('');
+
+      if (heroStatCount) heroStatCount.textContent = `${reviews.length}+`;
+      if (heroStatLabel) heroStatLabel.textContent = 'Avaliações de clientes';
     } catch (err) {
       console.error(err);
       reviewsList.innerHTML = `<p class="text-muted text-sm px-1">Não foi possível carregar as avaliações neste momento.</p>`;
